@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#0e1116" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="icon-192.png" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="apple-mobile-web-app-title" content="起个卦" />
+<meta name="mobile-web-app-capable" content="yes" />
+<title>起个卦</title>
+<style>
+  :root{
+    --ink:#0d1015;
+    --ink2:#141922;
+    --panel:#171d27;
+    --line:rgba(217,178,106,.16);
+    --gold:#d9b26a;
+    --gold-2:#f0d9a6;
+    --text:#e9e4d9;
+    --dim:#8a8f99;
+    --red:#c9605a;
+    --green:#6fae8b;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(217,178,106,.10), transparent 60%),
+      radial-gradient(800px 500px at 90% 110%, rgba(111,174,139,.06), transparent 60%),
+      var(--ink);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    min-height:100vh;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{max-width:520px;margin:0 auto;padding:0 16px 40px;position:relative}
+  /* ---------- 顶部 ---------- */
+  .top{padding:26px 0 10px;text-align:center}
+  .brand{
+    font-family:"Songti SC","STSong","KaiTi","Kaiti SC",serif;
+    font-size:30px;letter-spacing:.32em;text-indent:.32em;
+    color:var(--gold-2);
+    text-shadow:0 0 24px rgba(217,178,106,.28);
+  }
+  .brand::before,.brand::after{content:"❖";font-size:12px;color:var(--gold);opacity:.55;margin:0 12px;vertical-align:middle}
+  .slogan{margin-top:6px;font-size:12px;letter-spacing:.22em;color:var(--dim)}
+  /* ---------- 步骤条 ---------- */
+  .steps{display:flex;justify-content:center;gap:6px;margin:18px 0 20px}
+  .step{flex:1;max-width:120px;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.1em;position:relative;padding-top:16px}
+  .step i{
+    position:absolute;top:0;left:50%;transform:translateX(-50%);
+    width:14px;height:3px;border-radius:2px;background:#2a3140;display:block;transition:.3s;
+  }
+  .step.on{color:var(--gold-2)}
+  .step.on i{background:var(--gold);box-shadow:0 0 10px rgba(217,178,106,.7);width:26px}
+  /* ---------- 卡片 ---------- */
+  .card{
+    background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01));
+    border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;margin-bottom:14px;
+    backdrop-filter:blur(6px);
+    animation:fadeUp .45s ease both;
+  }
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .card h2{
+    margin:0 0 4px;font-size:16px;font-weight:600;color:var(--gold-2);
+    font-family:"Songti SC","STSong",serif;letter-spacing:.06em;
+  }
+  .card .hint{font-size:12px;color:var(--dim);margin:0 0 12px;line-height:1.6}
+  /* ---------- 输入 ---------- */
+  textarea,input[type=text],input[type=number],select{
+    width:100%;background:#0b0e13;border:1px solid #28303e;border-radius:12px;
+    color:var(--text);font-size:14px;padding:12px 14px;font-family:inherit;
+    outline:none;transition:.2s;
+  }
+  textarea{min-height:96px;resize:vertical;line-height:1.7}
+  textarea:focus,input:focus{border-color:rgba(217,178,106,.55);box-shadow:0 0 0 3px rgba(217,178,106,.09)}
+  ::placeholder{color:#4e5563}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .chip{
+    font-size:12px;padding:6px 12px;border-radius:999px;cursor:pointer;
+    border:1px solid #2b3341;color:#a9b0bd;background:rgba(255,255,255,.02);transition:.2s;
+  }
+  .chip:hover,.chip:active{border-color:rgba(217,178,106,.5);color:var(--gold-2);background:rgba(217,178,106,.06)}
+  /* ---------- 按钮 ---------- */
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+    padding:14px;border-radius:13px;border:none;cursor:pointer;
+    font-size:15px;font-weight:600;letter-spacing:.12em;font-family:inherit;
+    background:linear-gradient(135deg,#e6c98a,#cba45e);color:#221a0b;
+    box-shadow:0 8px 24px -8px rgba(217,178,106,.55);
+    transition:transform .12s,opacity .2s;
+  }
+  .btn:active{transform:scale(.985)}
+  .btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+  .btn.ghost{
+    background:transparent;color:var(--gold-2);border:1px solid rgba(217,178,106,.35);
+    box-shadow:none;font-weight:500;
+  }
+  .btn.sm{padding:10px;font-size:13px;letter-spacing:.08em}
+  .row{display:flex;gap:10px;margin-top:12px}
+  .row .btn{margin:0}
+  /* ---------- 方式选择 ---------- */
+  .methods{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .method{
+    position:relative;padding:14px 12px;border-radius:14px;cursor:pointer;
+    border:1px solid #262e3b;background:rgba(255,255,255,.02);transition:.22s;overflow:hidden;
+  }
+  .method .ic{font-size:20px;line-height:1.2;margin-bottom:6px;display:block;color:var(--gold)}
+  .method .nm{font-size:14px;font-weight:600;color:var(--text);letter-spacing:.06em}
+  .method .ds{font-size:11px;color:var(--dim);margin-top:2px;line-height:1.5}
+  .method.on{border-color:rgba(217,178,106,.6);background:linear-gradient(160deg,rgba(217,178,106,.16),rgba(217,178,106,.03));box-shadow:0 0 22px -10px rgba(217,178,106,.9)}
+  .method.on .nm{color:var(--gold-2)}
+  /* ---------- 结果 ---------- */
+  .hidden{display:none!important}
+  .gua-head{display:flex;gap:16px;align-items:center;margin-bottom:12px}
+  .gua-figs{display:flex;align-items:center;gap:6px;flex:none}
+  .fig-arrow{color:var(--gold);font-size:13px;opacity:.85}
+  .gua-svg{flex:0 0 auto}
+  .gua-title{font-family:"Songti SC","STSong",serif;font-size:22px;color:var(--gold-2);letter-spacing:.1em;line-height:1.3}
+  .gua-sub{font-size:12px;color:var(--dim);margin-top:4px;letter-spacing:.06em}
+  .gua-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .tag{font-size:11px;padding:3px 9px;border-radius:6px;background:rgba(217,178,106,.10);border:1px solid rgba(217,178,106,.22);color:var(--gold-2)}
+  .tag.b{background:rgba(111,174,139,.10);border-color:rgba(111,174,139,.25);color:#9fd4b5}
+  .yao-list{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+  .cast-steps{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px;white-space:pre-line;font-size:12px;line-height:1.9;color:var(--dim);font-family:ui-monospace,Menlo,Consolas,monospace}
+  .cast-steps .cs-title{font-family:inherit;font-size:13px;color:var(--gold);margin-bottom:8px;letter-spacing:1px}
+  .ci-text{margin-top:10px;font-size:16px;line-height:1.95;color:var(--text);letter-spacing:.5px}
+  .ci-changed{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);font-size:12px;line-height:1.8;color:var(--dim)}
+  .yao{display:flex;align-items:center;gap:10px;font-size:12.5px;padding:5px 0;color:#b9bfc9}
+  .yao .no{width:34px;color:var(--dim);font-size:11px;letter-spacing:.04em}
+  .yao .bar{position:relative;width:64px;height:7px;display:flex;gap:5px;flex:0 0 auto}
+  .yao .bar b{background:#cfc7b4;border-radius:2px;height:100%;flex:1}
+  .yao .bar.yin b{flex:1}
+  .yao .bar.yin b:first-child{margin-right:0}
+  .yao .bar .gap{width:8px;flex:0 0 auto}
+  .yao.dong .bar b{background:var(--gold);box-shadow:0 0 8px rgba(217,178,106,.6)}
+  .yao .mark{font-size:10px;color:var(--gold);min-width:26px}
+  /* ---------- AI 输出 ---------- */
+  .ai-box{font-size:14px;line-height:1.95;color:#d7d2c7;word-break:break-word}
+  .ai-box p{margin:0 0 10px}
+  .ai-box strong{color:var(--gold-2);font-weight:600}
+  .ai-box .sec{margin:16px 0 8px;font-size:14px;color:var(--gold);font-weight:600;letter-spacing:.04em}
+  .cursor{display:inline-block;width:7px;height:15px;background:var(--gold);vertical-align:-2px;animation:blink .9s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .thinking{color:var(--dim);font-size:13px;letter-spacing:.08em}
+  .thinking span{animation:bob 1.2s infinite}
+  .thinking span:nth-child(2){animation-delay:.15s}
+  .thinking span:nth-child(3){animation-delay:.3s}
+  @keyframes bob{0%,100%{opacity:.25}50%{opacity:1}}
+  /* ---------- 设置 ---------- */
+  .set-item{margin-bottom:12px}
+  .set-item label{display:block;font-size:12px;color:var(--dim);margin-bottom:6px;letter-spacing:.06em}
+  .gear{
+    position:absolute;right:16px;top:26px;width:34px;height:34px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    border:1px solid var(--line);color:var(--gold);font-size:15px;background:rgba(255,255,255,.02);
+  }
+  .toast{
+    position:fixed;left:50%;bottom:40px;transform:translate(-50%,20px);opacity:0;
+    background:#20262f;border:1px solid var(--line);color:var(--gold-2);
+    padding:10px 18px;border-radius:10px;font-size:13px;transition:.3s;pointer-events:none;z-index:99;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  /* 摇卦动画 */
+  .coins{display:flex;justify-content:center;gap:14px;padding:10px 0 4px}
+  .coin{
+    width:44px;height:44px;border-radius:50%;
+    background:radial-gradient(circle at 32% 28%,#f2dfb0,#c9a45c 62%,#8a6b30);
+    box-shadow:inset 0 0 0 2px rgba(90,66,22,.45),0 6px 16px -6px rgba(0,0,0,.9);
+    display:flex;align-items:center;justify-content:center;
+    color:#5a4216;font-size:11px;font-weight:700;letter-spacing:.04em;
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  }
+  .coin.spin{animation:spin .55s cubic-bezier(.5,0,.5,1) infinite}
+  @keyframes spin{0%{transform:rotateY(0) translateY(0)}50%{transform:rotateY(540deg) translateY(-8px)}100%{transform:rotateY(1080deg) translateY(0)}}
+  .cast-title{text-align:center;font-size:12px;color:var(--dim);letter-spacing:.14em;margin-bottom:2px}
+  .live-lines{margin:6px auto 0;width:120px}
+  .live-line{height:9px;margin:6px 0;display:flex;gap:7px;opacity:.25;transition:.35s}
+  .live-line b{background:#cfc7b4;border-radius:2px;height:100%;flex:1}
+  .live-line.on{opacity:1}
+  .live-line.on b{background:var(--gold);box-shadow:0 0 8px rgba(217,178,106,.5)}
+  .live-line.done b{background:#cfc7b4;box-shadow:none}
+  .live-line.done.dong b{background:var(--gold);box-shadow:0 0 8px rgba(217,178,106,.5)}
+  .foot{text-align:center;font-size:11px;color:#4b5261;margin-top:26px;line-height:1.9;letter-spacing:.06em}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="gear" id="gearBtn" title="设置" style="display:none">⚙</div>
+    <div class="brand" id="brandTitle">起个卦</div>
+    <div class="slogan">心诚则灵 · 一事一卦</div>
+  </div>
+
+  <div class="steps">
+    <div class="step on" id="st1"><i></i>问 事</div>
+    <div class="step" id="st2"><i></i>起 卦</div>
+    <div class="step" id="st3"><i></i>解 卦</div>
+  </div>
+
+  <!-- ============ 第一步：问事 ============ -->
+  <section id="step1">
+    <div class="card">
+      <h2>你想问什么？</h2>
+      <p class="hint">心里默念一件事，越具体越好。一事一卦，不可反复起问。</p>
+      <textarea id="question" maxlength="200" placeholder="例如：我下个月要不要接受这份新工作？"></textarea>
+      <div class="chips" id="qChips"></div>
+      <div class="row"><button class="btn" id="toStep2">下一步 · 选择起卦方式</button></div>
+    </div>
+  </section>
+
+  <!-- ============ 第二步：起卦 ============ -->
+  <section id="step2" class="hidden">
+    <div class="card">
+      <h2>选择起卦方式</h2>
+      <p class="hint">四种古法，任选其一。方式不同，取象不同，结果皆可参。</p>
+      <div class="methods" id="methods">
+        <div class="method on" data-m="time">
+          <span class="ic">☷</span><div class="nm">时间起卦</div>
+          <div class="ds">按当下年月日时取数</div>
+        </div>
+        <div class="method" data-m="num">
+          <span class="ic">⚂</span><div class="nm">数字起卦</div>
+          <div class="ds">随口报 2 至 3 个数</div>
+        </div>
+        <div class="method" data-m="text">
+          <span class="ic">✎</span><div class="nm">文字起卦</div>
+          <div class="ds">一句话拆字取数</div>
+        </div>
+        <div class="method" data-m="coin">
+          <span class="ic">◉</span><div class="nm">铜钱摇卦</div>
+          <div class="ds">六爻六掷，含动爻变卦</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="panelTime">
+      <h2>此刻取数</h2>
+      <p class="hint" id="timePreview">—</p>
+      <div class="row"><button class="btn ghost sm" id="refreshTime">按此刻重新取数</button></div>
+    </div>
+
+    <div class="card hidden" id="panelNum">
+      <h2>报出你的数字</h2>
+      <p class="hint">凭直觉报数，不要反复改。可用空格或逗号分隔，如「3 8」或「17, 6, 9」。</p>
+      <input type="text" id="numInput" placeholder="3 8" autocomplete="off" />
+      <div class="row"><button class="btn ghost sm" id="randNum">随便给我一组</button></div>
+    </div>
+
+    <div class="card hidden" id="panelText">
+      <h2>写一句话</h2>
+      <p class="hint">写下此刻最想说的一句话，或你问题里最关键的一句。系统按字取数成卦。</p>
+      <textarea id="textInput" maxlength="60" placeholder="例如：山高水长，路在何方" style="min-height:74px"></textarea>
+    </div>
+
+    <div class="card hidden" id="panelCoin">
+      <h2>铜钱摇卦</h2>
+      <p class="hint">观想所问之事，心中默念，然后点击下方「起卦」，系统代你连掷六次。</p>
+      <div class="cast-title" id="castTitle">六爻未起</div>
+      <div class="coins">
+        <div class="coin" id="c1">乾</div>
+        <div class="coin" id="c2">坤</div>
+        <div class="coin" id="c3">易</div>
+      </div>
+      <div class="live-lines" id="liveLines"></div>
+    </div>
+
+    <div class="row">
+      <button class="btn ghost sm" id="back1">返回问题</button>
+      <button class="btn" id="doCast">起 卦</button>
+    </div>
+  </section>
+
+  <!-- ============ 第三步：解卦 ============ -->
+  <section id="step3" class="hidden">
+    <div class="card">
+      <div class="gua-head">
+        <div class="gua-figs">
+          <div id="guaSvg"></div>
+          <div class="fig-arrow" id="guaArrow">→</div>
+          <div id="guaSvgChanged"></div>
+        </div>
+        <div style="min-width:0">
+          <div class="gua-title" id="guaName"></div>
+          <div class="gua-sub" id="guaSub"></div>
+          <div class="gua-meta" id="guaMeta"></div>
+        </div>
+      </div>
+      <div class="yao-list" id="yaoList"></div>
+      <div class="cast-steps" id="castSteps"></div>
+    </div>
+
+    <div class="card" id="ciCard">
+      <h2>卦辞</h2>
+      <p class="hint" id="ciFrom"></p>
+      <div class="ci-text" id="ciText"></div>
+      <div class="ci-changed" id="ciChanged"></div>
+    </div>
+
+    <div class="card">
+      <h2 id="aiTitle">小易解卦</h2>
+      <p class="hint" id="aiHint">正在为你推演…</p>
+      <div id="aiBox" class="ai-box"></div>
+      <div class="row">
+        <button class="btn ghost sm" id="againAI">重新解读</button>
+        <button class="btn ghost sm" id="newCast">再起一卦</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">
+    卦象仅供参考 · 谋事在人<br />本程序不构成任何投资、医疗、法律建议
+  </div>
+</div>
+
+<!-- ============ 设置 ============ -->
+<div id="settings" class="hidden" style="position:fixed;inset:0;z-index:50;background:rgba(6,8,12,.86);backdrop-filter:blur(8px);overflow:auto">
+  <div style="max-width:520px;margin:0 auto;padding:24px 16px 40px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-family:'Songti SC',serif;font-size:20px;color:var(--gold-2);letter-spacing:.14em">解卦引擎设置</div>
+      <button class="btn ghost sm" id="closeSet" style="width:auto;padding:8px 14px">关闭</button>
+    </div>
+    <div class="card" style="animation:none">
+      <p class="hint" style="margin-bottom:14px">
+        此入口默认隐藏，连点页面顶部「起个卦」5 次才会出现，只有你自己能打开。
+        注意：隐藏入口只是不显示，API Key 仍然写在网页源码里，懂技术的人查看源码就能拿到。
+        要让 Key 真正保密，必须改由服务器代理调用。
+      </p>
+      <div class="set-item">
+        <label>接口地址（Base URL）</label>
+        <input type="text" id="setBase" placeholder="https://api.deepseek.com/v1" />
+      </div>
+      <div class="set-item">
+        <label>模型名称（Model）</label>
+        <input type="text" id="setModel" placeholder="deepseek-chat" />
+      </div>
+      <div class="set-item">
+        <label>API Key</label>
+        <input type="text" id="setKey" placeholder="sk-..." />
+      </div>
+      <div class="row">
+        <button class="btn ghost sm" id="presetDeepseek">DeepSeek</button>
+        <button class="btn ghost sm" id="presetQwen">通义千问</button>
+        <button class="btn ghost sm" id="presetKimi">Kimi</button>
+      </div>
+      <div class="row"><button class="btn" id="saveSet">保存设置</button></div>
+      <p class="hint" style="margin:12px 0 0">
+        不填也能用：会自动切换为「本地卦辞模式」，给出卦象与基础断语。
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+/* ================= 基础数据 ================= */
+const T = {
+  乾:{b:'111', s:'☰', e:'天', w:'金'},
+  兑:{b:'110', s:'☱', e:'泽', w:'金'},
+  离:{b:'101', s:'☲', e:'火', w:'火'},
+  震:{b:'100', s:'☳', e:'雷', w:'木'},
+  巽:{b:'011', s:'☴', e:'风', w:'木'},
+  坎:{b:'010', s:'☵', e:'水', w:'水'},
+  艮:{b:'001', s:'☶', e:'山', w:'土'},
+  坤:{b:'000', s:'☷', e:'地', w:'土'}
+};
+const ORDER = ['乾','兑','离','震','巽','坎','艮','坤'];
+
+const GUA = {
+  乾乾:'乾为天', 乾坤:'地天泰', 乾震:'雷天大壮', 乾巽:'风天小畜', 乾坎:'水天需', 乾离:'火天大有', 乾艮:'山天大畜', 乾兑:'泽天夬',
+  坤乾:'天地否', 坤坤:'坤为地', 坤震:'雷地豫', 坤巽:'风地观', 坤坎:'水地比', 坤离:'火地晋', 坤艮:'山地剥', 坤兑:'泽地萃',
+  震乾:'天雷无妄', 震坤:'地雷复', 震震:'震为雷', 震巽:'风雷益', 震坎:'水雷屯', 震离:'火雷噬嗑', 震艮:'山雷颐', 震兑:'泽雷随',
+  巽乾:'天风姤', 巽坤:'地风升', 巽震:'雷风恒', 巽巽:'巽为风', 巽坎:'水风井', 巽离:'火风鼎', 巽艮:'山风蛊', 巽兑:'泽风大过',
+  坎乾:'天水讼', 坎坤:'地水师', 坎震:'雷水解', 坎巽:'风水涣', 坎坎:'坎为水', 坎离:'火水未济', 坎艮:'山水蒙', 坎兑:'泽水困',
+  离乾:'天火同人', 离坤:'地火明夷', 离震:'雷火丰', 离巽:'风火家人', 离坎:'水火既济', 离离:'离为火', 离艮:'山火贲', 离兑:'泽火革',
+  艮乾:'天山遁', 艮坤:'地山谦', 艮震:'雷山小过', 艮巽:'风山渐', 艮坎:'水山蹇', 艮离:'火山旅', 艮艮:'艮为山', 艮兑:'泽山咸',
+  兑乾:'天泽履', 兑坤:'地泽临', 兑震:'雷泽归妹', 兑巽:'风泽中孚', 兑坎:'水泽节', 兑离:'火泽睽', 兑艮:'山泽损', 兑兑:'兑为泽'
+};
+
+const BRIEF = {
+  '乾为天':'刚健自强，事在力行。宜主动进取，忌骄躁自满，靠实力说话。',
+  '坤为地':'厚德载物，顺势承接。宜守不宜争，慢就是快，跟对人比冲在前面更重要。',
+  '水雷屯':'万事开头难，眼前多有阻滞。先扎根、先解决基本盘，别急着扩张。',
+  '山水蒙':'信息不全、看不明朗。宜请教明白人，先学后动，别凭感觉下注。',
+  '水天需':'时机未到，需要等待。把准备做足，条件成熟再出手，不可硬闯。',
+  '天水讼':'容易生争执。能退一步就退一步，必要时找中间人，别把话说死。',
+  '地水师':'讲究组织与章法。靠团队、靠纪律，不可单打独斗、意气用事。',
+  '水地比':'宜亲近、结盟、找靠山。人多好办事，主动示好会得到支持。',
+  '风天小畜':'小有积蓄，力量尚不足。先积累资源与口碑，暂缓大动作。',
+  '天泽履':'如履薄冰。守规矩、守分寸，谨慎前行，不越界则无咎。',
+  '地天泰':'上下通达，正是好时候。可放手推进，但要好上加好、不忘守成。',
+  '天地否':'上下不通，多说无益。宜自保收缩、静待时变，暂不谋求突破。',
+  '天火同人':'志同道合，宜合作、公开透明。摒弃私心，与同频的人一起做。',
+  '火天大有':'收获丰盛之时。宜分享、宜低调，忌独吞与张扬，否则易失。',
+  '地山谦':'谦虚受益，低调行事。越肯让、越肯听，得到的支持越多。',
+  '雷地豫':'宜早做准备与动员。提前布局，防乐极生悲、防松散懈怠。',
+  '泽雷随':'顺势跟随，别硬扛。选对人、跟对节奏，比自己另起一摊更省力。',
+  '山风蛊':'积弊已久，需要整顿清理。先把旧账旧问题处理干净再往前。',
+  '地泽临':'渐进上升之象。宜亲自到场、以诚待人，好事会一点点靠近。',
+  '风地观':'先观察，再表态。看清格局与人心，再决定站哪、做什么。',
+  '火雷噬嗑':'有障碍需要咬断。宜明断是非、依规处理，该硬一次就硬一次。',
+  '山火贲':'外表光鲜之象。修饰形象有用，但别只做表面功夫。',
+  '山地剥':'剥落衰退之象。宜止损、宜收缩，现在不适合冒进与加码。',
+  '地雷复':'转机初现，可以从头再来。小步回归正轨，别指望一步到位。',
+  '天雷无妄':'别投机取巧，本分做事。意外之事勿强求，顺其自然反得吉。',
+  '山天大畜':'蓄势待发。宜储备资源、按兵不动，等力量攒够再动。',
+  '山雷颐':'养身、养心、养人。管好嘴、管好开销，先把自己的根养好。',
+  '泽风大过':'负重过度之象。需要果断调整结构，别硬撑，撑久了会断。',
+  '坎为水':'险中求存。谨慎、守信、一步一探，靠稳不靠快。',
+  '离为火':'光明依附之象。宜借势、宜展示，但火要有所附，别空烧。',
+  '泽山咸':'感应相通，人心向你。感情与沟通皆顺，宜真诚表达。',
+  '雷风恒':'持之以恒，守常不变。别天天换方向，稳住就能成。',
+  '天山遁':'宜退不宜进。暂时回避锋芒，保存实力，退是为了更好地进。',
+  '雷天大壮':'气势强盛，但不可蛮干。过刚易折，有力也要有分寸。',
+  '火地晋':'上升晋进之象。宜积极表现、主动争取，容易得贵人相助。',
+  '地火明夷':'光明受伤之象。宜韬光养晦、藏锋守拙，别在此时硬出头。',
+  '风火家人':'先齐家，后立业。内部关系理顺了，外面的事才谈得顺。',
+  '火泽睽':'意见相左之象。求同存异，小事可成，大事别急着合并。',
+  '水山蹇':'前路艰难。宜停步求助、绕道而行，硬走只会更累。',
+  '雷水解':'困局开始松动。宜速解不宜拖，抓住这段缓和期把事办了。',
+  '山泽损':'先舍后得。减负、精简、断舍离，吃点小亏反而顺。',
+  '风雷益':'增益有利之象。宜主动投入、往有利的方向走，越动越有。',
+  '泽天夬':'当断则断。清除隐患要果断，但要留余地，不做绝。',
+  '天风姤':'偶遇与吸引之象。防不速之客，勿轻信突如其来的好事。',
+  '泽地萃':'汇聚人气与资源。宜聚众办事，注意别让人群失控拥堵。',
+  '地风升':'稳步上升之象。循序渐进、积小成大，急不得也停不得。',
+  '泽水困':'处处受限之象。少说多做，守住底线，等待解困的人出现。',
+  '水风井':'守着根本。修好自己这口井，利人亦利己，别乱挪位置。',
+  '泽火革':'该变了。宜果断改革，旧的不去新的不来，但变革要有序。',
+  '火风鼎':'鼎新立业之象。宜稳住局面、调和众口，把新的架子搭起来。',
+  '震为雷':'突发变动之象。先定心神，动中有机，慌乱才是最大的损失。',
+  '艮为山':'该停就停。守住边界，静观其变，不妄动即是吉。',
+  '风山渐':'循序渐进，如木生长。急不得，按部就班反而最快。',
+  '雷泽归妹':'名分未正之象。勿急于定终身、勿仓促签约，先看清再说。',
+  '雷火丰':'盛极之时。宜把握当下把事做成，同时防盛极转衰。',
+  '火山旅':'身在旅途之象。宜轻装简行、客随主便，别在他乡强出头。',
+  '巽为风':'柔顺渗透之象。宜迂回沟通、以柔克刚，别正面硬碰。',
+  '兑为泽':'喜悦口舌之象。宜沟通谈笑，但防口舌是非与过度承诺。',
+  '风水涣':'人心涣散之象。需要重新凝聚共识，先把大家拉回一处。',
+  '水泽节':'有节制才长久。宜立规矩、控节奏、节制开销与情绪。',
+  '风泽中孚':'以诚取信。诚则灵，虚则败，此时真诚比技巧重要。',
+  '雷山小过':'小事可为，大事勿做。宜低调小步，别越级别越界。',
+  '水火既济':'事已成之象。宜守成防乱，别在收尾阶段翻车。',
+  '火水未济':'尚未完成之象。最后一段最难，谨慎收尾，不可松懈。'
+};
+
+/* 《周易》六十四卦卦辞（原文） */
+const CI = {
+  '乾为天':'元亨利贞。',
+  '坤为地':'元亨，利牝马之贞。君子有攸往，先迷后得主，利。西南得朋，东北丧朋。安贞吉。',
+  '水雷屯':'元亨利贞。勿用有攸往，利建侯。',
+  '山水蒙':'亨。匪我求童蒙，童蒙求我。初筮告，再三渎，渎则不告。利贞。',
+  '水天需':'有孚，光亨，贞吉。利涉大川。',
+  '天水讼':'有孚窒惕，中吉，终凶。利见大人，不利涉大川。',
+  '地水师':'贞，丈人吉，无咎。',
+  '水地比':'吉。原筮元永贞，无咎。不宁方来，后夫凶。',
+  '风天小畜':'亨。密云不雨，自我西郊。',
+  '天泽履':'履虎尾，不咥人，亨。',
+  '地天泰':'小往大来，吉亨。',
+  '天地否':'否之匪人，不利君子贞，大往小来。',
+  '天火同人':'同人于野，亨。利涉大川，利君子贞。',
+  '火天大有':'元亨。',
+  '地山谦':'亨，君子有终。',
+  '雷地豫':'利建侯行师。',
+  '泽雷随':'元亨利贞，无咎。',
+  '山风蛊':'元亨，利涉大川。先甲三日，后甲三日。',
+  '地泽临':'元亨利贞。至于八月有凶。',
+  '风地观':'盥而不荐，有孚颙若。',
+  '火雷噬嗑':'亨。利用狱。',
+  '山火贲':'亨。小利有攸往。',
+  '山地剥':'不利有攸往。',
+  '地雷复':'亨。出入无疾，朋来无咎。反复其道，七日来复。利有攸往。',
+  '天雷无妄':'元亨利贞。其匪正有眚，不利有攸往。',
+  '山天大畜':'利贞。不家食吉，利涉大川。',
+  '山雷颐':'贞吉。观颐，自求口实。',
+  '泽风大过':'栋桡，利有攸往，亨。',
+  '坎为水':'习坎，有孚，维心亨，行有尚。',
+  '离为火':'利贞，亨。畜牝牛，吉。',
+  '泽山咸':'亨，利贞。取女吉。',
+  '雷风恒':'亨，无咎，利贞，利有攸往。',
+  '天山遁':'亨，小利贞。',
+  '雷天大壮':'利贞。',
+  '火地晋':'康侯用锡马蕃庶，昼日三接。',
+  '地火明夷':'利艰贞。',
+  '风火家人':'利女贞。',
+  '火泽睽':'小事吉。',
+  '水山蹇':'利西南，不利东北。利见大人，贞吉。',
+  '雷水解':'利西南。无所往，其来复吉。有攸往，夙吉。',
+  '山泽损':'有孚，元吉，无咎，可贞，利有攸往。曷之用？二簋可用享。',
+  '风雷益':'利有攸往，利涉大川。',
+  '泽天夬':'扬于王庭，孚号有厉。告自邑，不利即戎。利有攸往。',
+  '天风姤':'女壮，勿用取女。',
+  '泽地萃':'亨。王假有庙，利见大人，亨，利贞。用大牲吉。利有攸往。',
+  '地风升':'元亨。用见大人，勿恤，南征吉。',
+  '泽水困':'亨，贞，大人吉，无咎。有言不信。',
+  '水风井':'改邑不改井，无丧无得，往来井井。汔至亦未繘井，羸其瓶，凶。',
+  '泽火革':'己日乃孚。元亨利贞，悔亡。',
+  '火风鼎':'元吉，亨。',
+  '震为雷':'亨。震来虩虩，笑言哑哑。震惊百里，不丧匕鬯。',
+  '艮为山':'艮其背，不获其身；行其庭，不见其人。无咎。',
+  '风山渐':'女归吉，利贞。',
+  '雷泽归妹':'征凶，无攸利。',
+  '雷火丰':'亨，王假之。勿忧，宜日中。',
+  '火山旅':'小亨，旅贞吉。',
+  '巽为风':'小亨。利有攸往，利见大人。',
+  '兑为泽':'亨，利贞。',
+  '风水涣':'亨。王假有庙，利涉大川，利贞。',
+  '水泽节':'亨。苦节不可贞。',
+  '风泽中孚':'豚鱼吉。利涉大川，利贞。',
+  '雷山小过':'亨，利贞。可小事，不可大事。飞鸟遗之音，不宜上宜下，大吉。',
+  '水火既济':'亨，小利贞。初吉终乱。',
+  '火水未济':'亨。小狐汔济，濡其尾，无攸利。'
+};
+
+const SHENG = {金:'水', 水:'木', 木:'火', 火:'土', 土:'金'};
+const KE = {金:'木', 木:'土', 土:'水', 水:'火', 火:'金'};
+/* ================= 工具 ================= */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const randInt = n => Math.floor(Math.random() * n) + 1;
+
+function toast(msg){
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+const S = { q:'', method:'time', result:null, busy:false };
+
+function goStep(n){
+  [1,2,3].forEach(i => {
+    $('#step' + i).classList.toggle('hidden', i !== n);
+    $('#st' + i).classList.toggle('on', i <= n);
+  });
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ================= 起卦算法 ================= */
+const ZHI = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+
+function timeNumbers(d = new Date()){
+  const y = d.getFullYear(), m = d.getMonth() + 1, day = d.getDate(), h = d.getHours();
+  const nian = ((y - 4) % 12) + 1;              // 年支序：子1…亥12
+  const shi  = Math.floor(((h + 1) % 24) / 2) + 1; // 时辰序
+  const up   = ((nian + m + day) % 8) || 8;
+  const low  = ((nian + m + day + shi) % 8) || 8;
+  const dong = ((nian + m + day + shi) % 6) || 6;
+  const zhiName = ZHI[(shi - 1) % 12];
+  return {
+    up, low, dong,
+    desc: `${y}年${m}月${day}日 ${zhiName}时（时数${shi}）`,
+    detail: `年支数${nian} + 月${m} + 日${day} = ${nian + m + day}\n` +
+            `上卦：${nian + m + day} ÷ 8 余 ${(nian + m + day) % 8}，取 ${up} → ${ORDER[up - 1]}\n` +
+            `下卦：${nian + m + day + shi} ÷ 8 余 ${(nian + m + day + shi) % 8}，取 ${low} → ${ORDER[low - 1]}\n` +
+            `动爻：${nian + m + day + shi} ÷ 6 余 ${(nian + m + day + shi) % 6}，取 ${dong} → 第${dong}爻`
+  };
+}
+
+function numberNumbers(nums){
+  const n = nums.filter(v => Number.isFinite(v) && v > 0);
+  const a = n[0], b = n[1] != null ? n[1] : Math.ceil(a / 2);
+  const up = (a % 8) || 8;
+  const low = (b % 8) || 8;
+  const dong = n[2] != null ? (n[2] % 6 || 6) : ((a + b) % 6 || 6);
+  const dsrc = n[2] != null ? n[2] : (a + b);
+  return { up, low, dong, desc:'数字取象',
+    detail: `所报数字 ${n.join('、')}\n` +
+            `上卦：${a} ÷ 8 余 ${a % 8}，取 ${up} → ${ORDER[up - 1]}\n` +
+            `下卦：${b} ÷ 8 余 ${b % 8}，取 ${low} → ${ORDER[low - 1]}\n` +
+            `动爻：${dsrc} ÷ 6 余 ${dsrc % 6}，取 ${dong} → 第${dong}爻` };
+}
+
+function textNumbers(txt){
+  const chars = Array.from(txt.replace(/[\s，。！？、,.!?]/g, ''));
+  if (chars.length < 2) return null;
+  const half = Math.ceil(chars.length / 2);
+  const sum = arr => arr.reduce((s, c) => s + c.codePointAt(0), 0);
+  const a = sum(chars.slice(0, half)), b = sum(chars.slice(half));
+  const all = a + b;
+  const up = (a % 8) || 8;
+  const low = (b % 8) || 8;
+  const dong = (all % 6) || 6;
+  return { up, low, dong, desc:`共${chars.length}字，前${half}字/后${chars.length - half}字`,
+    detail: `原句共 ${chars.length} 字，前半 ${half} 字 / 后半 ${chars.length - half} 字\n` +
+            `上卦：前半字码和 ${a} ÷ 8 余 ${a % 8}，取 ${up} → ${ORDER[up - 1]}\n` +
+            `下卦：后半字码和 ${b} ÷ 8 余 ${b % 8}，取 ${low} → ${ORDER[low - 1]}\n` +
+            `动爻：${all} ÷ 6 余 ${all % 6}，取 ${dong} → 第${dong}爻` };
+}
+
+/* 由上下卦 + 动爻组装结果 */
+function buildGua(lowerName, upperName, dong, method, extra){
+  const lines = (T[lowerName].b + T[upperName].b).split('').map(c => c === '1');
+  const dongs = dong ? [dong] : [];
+  const changedBits = lines.map((yang, i) => dongs.includes(i + 1) ? !yang : yang);
+  const name = GUA[lowerName + upperName];
+  let changed = null;
+  if (dongs.length){
+    const cLow = bitsToTrigram(changedBits.slice(0, 3));
+    const cUp = bitsToTrigram(changedBits.slice(3, 6));
+    const cn = GUA[cLow + cUp];
+    if (cn !== name) changed = { name:cn, lower:cLow, upper:cUp, lines: changedBits };
+  }
+  return {
+    q: S.q, method,
+    lower: lowerName, upper: upperName,
+    name, brief: BRIEF[name] || '',
+    ci: CI[name] || '', changedCi: changed ? (CI[changed.name] || '') : '',
+    lines, dongs, changed,
+    tiYong: dongs.length === 1 ? tiYongText(lowerName, upperName, dongs[0]) : '',
+    extra
+  };
+}
+
+function bitsToTrigram(bits){
+  const s = bits.map(b => b ? '1' : '0').join('');
+  return Object.keys(T).find(k => T[k].b === s);
+}
+
+function tiYongText(lowerName, upperName, dong){
+  const yongName = dong <= 3 ? lowerName : upperName;
+  const tiName = dong <= 3 ? upperName : lowerName;
+  const ti = T[tiName].w, yong = T[yongName].w;
+  let rel;
+  if (ti === yong) rel = '比和，同气相求，事多顺遂';
+  else if (SHENG[yong] === ti) rel = '用生体，有外力相助，较易成';
+  else if (SHENG[ti] === yong) rel = '体生用，你有付出、有消耗，需量力';
+  else if (KE[yong] === ti) rel = '用克体，外部压力大，宜守不宜攻';
+  else rel = '体克用，你能掌控局面，但需用力';
+  return `体卦${tiName}（${T[tiName].e}·${ti}） 用卦${yongName}（${T[yongName].e}·${yong}），${rel}`;
+}
+
+const METHOD_LABEL = { time:'时间起卦', num:'数字起卦', text:'文字起卦', coin:'铜钱摇卦' };
+
+/* ================= 渲染卦象 ================= */
+function guaSvg(lines, dongs){
+  const W = 74, H = 6 * 11;
+  let s = `<svg class="gua-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`;
+  lines.forEach((yang, i) => {
+    const y = (5 - i) * 11 + 2;
+    const dong = dongs.includes(i + 1);
+    const color = dong ? '#d9b26a' : '#cfc7b4';
+    if (yang) s += `<rect x="4" y="${y}" width="${W - 8}" height="6" rx="1.5" fill="${color}"/>`;
+    else s += `<rect x="4" y="${y}" width="${(W - 8) / 2 - 6}" height="6" rx="1.5" fill="${color}"/>
+               <rect x="${W / 2 + 2}" y="${y}" width="${(W - 8) / 2 - 6}" height="6" rx="1.5" fill="${color}"/>`;
+  });
+  return s + '</svg>';
+}
+
+function renderResult(r){
+  S.result = r;
+  const upper = T[r.upper], lower = T[r.lower];
+  $('#guaSvg').innerHTML = guaSvg(r.lines, r.dongs);
+  const gc = $('#guaSvgChanged'), ga = $('#guaArrow');
+  if (r.changed && r.changed.lines){
+    gc.innerHTML = guaSvg(r.changed.lines, []);
+    gc.style.display = '';
+    ga.style.display = '';
+  } else {
+    gc.style.display = 'none';
+    ga.style.display = 'none';
+  }
+  $('#guaName').textContent = r.name;
+  $('#guaSub').textContent = `${upper.s} 上${upper.e}${upper.w} · ${lower.s} 下${lower.e}${lower.w}`;
+  const tags = [`<span class="tag">${METHOD_LABEL[r.method]}</span>`];
+  if (r.dongs.length) tags.push(`<span class="tag">动爻 ${r.dongs.join('、')}</span>`);
+  if (r.changed) tags.push(`<span class="tag b">变卦 ${r.changed.name}</span>`);
+  $('#guaMeta').innerHTML = tags.join('');
+
+  $('#ciCard').style.display = r.ci ? '' : 'none';
+  $('#ciFrom').textContent = `《周易》· ${r.name}`;
+  $('#ciText').textContent = r.ci || '';
+  const cc = $('#ciChanged');
+  if (r.changed && r.changedCi){
+    cc.style.display = '';
+    cc.textContent = `变卦 ${r.changed.name}：${r.changedCi}`;
+  } else {
+    cc.style.display = 'none';
+  }
+
+  const YAO_NAME = ['初','二','三','四','五','上'];
+  let html = '';
+  for (let i = 5; i >= 0; i--){
+    const yang = r.lines[i];
+    const dong = r.dongs.includes(i + 1);
+    const yinCls = yang ? '' : 'yin';
+    const inner = yang
+      ? '<b></b>'
+      : '<b></b><span class="gap"></span><b></b>';
+    const num = yang ? '九' : '六';
+    const label = i === 0 ? `初${num}` : i === 5 ? `上${num}` : `${num}${YAO_NAME[i]}`;
+    html += `<div class="yao ${dong ? 'dong' : ''}">
+      <span class="no">${label}</span>
+      <span class="bar ${yinCls}">${inner}</span>
+      <span class="mark">${dong ? (yang ? '○ 动' : '× 动') : ''}</span>
+    </div>`;
+  }
+  $('#yaoList').innerHTML = html;
+  const cs = $('#castSteps');
+  if (r.extra){
+    cs.style.display = '';
+    cs.innerHTML = '';
+    const t = document.createElement('div');
+    t.className = 'cs-title';
+    t.textContent = '起卦过程';
+    cs.appendChild(t);
+    cs.appendChild(document.createTextNode(r.extra));
+  } else {
+    cs.style.display = 'none';
+  }
+}
+
+/* ================= 摇卦 ================= */
+async function castCoin(){
+  const lines = [], dongs = [];
+  const live = [];
+  $('#liveLines').innerHTML = '';
+  for (let i = 0; i < 6; i++){
+    const div = document.createElement('div');
+    div.className = 'live-line';
+    $('#liveLines').appendChild(div);
+    live.push(div);
+  }
+  const coins = [$('#c1'), $('#c2'), $('#c3')];
+  for (let i = 0; i < 6; i++){
+    $('#castTitle').textContent = `第 ${i + 1} 爻 · 摇卦中`;
+    coins.forEach(c => c.classList.add('spin'));
+    await sleep(560);
+    const backs = coins.map(() => Math.random() < 0.5);
+    const n = backs.filter(Boolean).length;
+    coins.forEach((c, k) => {
+      c.classList.remove('spin');
+      c.textContent = backs[k] ? '背' : '字';
+      c.style.transform = `rotate(${(k - 1) * 6}deg)`;
+    });
+    let yang, dong = false;
+    if (n === 3){ yang = true;  dong = true; }   // 三背 · 老阳
+    else if (n === 0){ yang = false; dong = true; } // 三字 · 老阴
+    else if (n === 1){ yang = true; }
+    else { yang = false; }
+    lines.push(yang);
+    if (dong) dongs.push(i + 1);
+    const el = live[i];
+    el.className = 'live-line on done' + (dong ? ' dong' : '');
+    el.innerHTML = yang ? '<b></b>' : '<b></b><span style="width:8px"></span><b></b>';
+    await sleep(260);
+  }
+  $('#castTitle').textContent = '六爻已成';
+  const low = bitsToTrigram(lines.slice(0, 3));
+  const up = bitsToTrigram(lines.slice(3, 6));
+  await sleep(320);
+  const r = buildGua(low, up, dongs.length === 1 ? dongs[0] : 0, 'coin',
+    lines.map((y, i) => `第${i + 1}爻：${y ? '阳' : '阴'}${dongs.includes(i + 1) ? '（动）' : '（静）'}`).join('\n'));
+  r.dongs = dongs;
+  // 多动爻时重新计算变卦
+  if (dongs.length){
+    const cb = lines.map((y, i) => dongs.includes(i + 1) ? !y : y);
+    const nLow = bitsToTrigram(cb.slice(0, 3)), nUp = bitsToTrigram(cb.slice(3, 6));
+    r.changed = GUA[nLow + nUp] !== r.name ? { name:GUA[nLow + nUp], lower:nLow, upper:nUp, lines: cb } : null;
+  }
+  return r;
+}
+/* ================= 配置 ================= */
+const CFG_KEY = 'qigua_cfg_v1';
+/* 线上默认走服务端代理 /api，Key 不出现在前端；
+   也可点右上角 ⚙ 填自己的 Key 直连其他兼容接口 */
+const DEFAULT_CFG = {
+  base: '/api',
+  model: 'deepseek-chat',
+  key: ''
+};
+/* 每日免费次数（仅拦截普通用户，非安全边界） */
+const DAILY_LIMIT = 5;
+const USAGE_KEY = 'qigua_usage_v1';
+function usageToday(){
+  try{
+    const u = JSON.parse(localStorage.getItem(USAGE_KEY)) || {};
+    const d = new Date().toLocaleDateString('sv');
+    return u.d === d ? (u.n || 0) : 0;
+  }catch(e){ return 0; }
+}
+function bumpUsage(){
+  const d = new Date().toLocaleDateString('sv');
+  const n = usageToday() + 1;
+  localStorage.setItem(USAGE_KEY, JSON.stringify({ d, n }));
+  return n;
+}
+function getCfg(){
+  let saved = {};
+  try{ saved = JSON.parse(localStorage.getItem(CFG_KEY)) || {}; }catch(e){}
+  return Object.assign({}, DEFAULT_CFG, saved);
+}
+function saveCfg(c){ localStorage.setItem(CFG_KEY, JSON.stringify(c)); }
+
+/* ================= 提示词 ================= */
+function buildPrompt(r){
+  const up = T[r.upper], low = T[r.lower];
+  const dongTxt = r.dongs.length
+    ? (r.dongs.length === 1 ? `动爻：第 ${r.dongs[0]} 爻（自下而上数，第${r.dongs[0]}爻变动）` : `动爻：第 ${r.dongs.join('、')} 爻同动`)
+    : '无动爻（静卦）';
+  const chTxt = r.changed ? `变卦：${r.changed.name}（上${T[r.changed.upper].e} 下${T[r.changed.lower].e}）` : '变卦：无';
+  return `你是一位精通《易经》的解卦先生，同时又非常接地气，能用最普通的大白话把卦讲透。
+
+【问卦人的问题】
+${r.q || '（未明确写出问题，请围绕他当下的处境给建议）'}
+
+【起卦信息】
+起卦方式：${METHOD_LABEL[r.method]}
+本卦：${r.name}（上卦 ${r.upper}${up.e}属${up.w}，下卦 ${r.lower}${low.e}属${low.w}）
+${dongTxt}
+${chTxt}
+${r.tiYong ? '体用：' + r.tiYong : ''}
+${r.extra ? '取数细节：' + r.extra : ''}
+
+【解卦要求】
+1. 开头两三句话直接回答他的问题：能成还是不能成、该做还是不该做，给出明确倾向和大概几成把握，不要模棱两可。
+2. 用大白话讲清楚这个卦"到底在说一件什么事"，用生活中的场景打比方。凡是出现术语（如动爻、体用、变卦），必须紧跟着用一句白话说人话解释。
+3. 结合他的具体问题，给 3 条能落地的建议：该做什么、别做什么。
+4. 说清时间节奏：什么时候适合动，什么时候先按兵不动。
+5. 点出最容易踩的坑，一句话提醒。
+6. 结尾给一句让人记得住的话。
+
+写法要求：像老朋友聊天，禁止文言文腔，禁止堆砌术语，禁止说"作为AI"。全文 600-900 字，用短小标题分段，结论放最前面。`;
+}
+
+/* ================= Markdown 简渲染 ================= */
+function esc(s){
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function renderMD(text){
+  if (!text) return '';
+  const blocks = esc(text).split(/\n/);
+  let out = '';
+  for (const raw of blocks){
+    const l = raw.trim();
+    if (!l) continue;
+    const clean = l.replace(/^#{1,6}\s*/, '').replace(/^\*\*(.+?)\*\*[:：]?$/, '$1');
+    const isHead = /^#{1,6}\s/.test(l) ||
+      /^\*\*[^*]{1,24}\*\*[:：]?$/.test(l) ||
+      /^[一二三四五六七八九十]{1,2}[、.．]/.test(l) ||
+      /^【.+】$/.test(l);
+    if (isHead){
+      out += `<div class="sec">${clean.replace(/^\*\*|\*\*$/g, '')}</div>`;
+      continue;
+    }
+    let t = l
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/`([^`]+)`/g, '<strong>$1</strong>');
+    if (/^[-*·•]\s+/.test(t)) t = '· ' + t.replace(/^[-*·•]\s+/, '');
+    if (/^\d+[.、]\s*/.test(t)) t = t.replace(/^(\d+)[.、]\s*/, '$1. ');
+    out += `<p>${t}</p>`;
+  }
+  return out;
+}
+
+/* ================= 本地兜底解读 ================= */
+const DONG_POS = {
+  1:'初爻主"事之始"，眼下还在起步，别急着要结果',
+  2:'二爻主"内位"，机会就在近处、在自己人身边，先把内部理顺',
+  3:'三爻在内外交界，进退之间最易出错，宁可慢一步也别冒进',
+  4:'四爻已入外卦，事情开始受外部牵制，多沟通、少自作主张',
+  5:'五爻为"主事之爻"，处在关键位置，你的判断能起决定作用',
+  6:'上爻主"事之极"，物极必反，该收手就要收手'
+};
+
+function renderLocal(r){
+  const box = $('#aiBox');
+  const dongLines = r.dongs.length
+    ? r.dongs.map(d => `<p>· 第 ${d} 爻动：${DONG_POS[d] || ''}。</p>`).join('')
+    : '<p>· 六爻皆静：静卦主"守"，眼下的局面短期不会自己变，靠你主动调整。</p>';
+  const yaoPct = (r.dongs.length === 1 ? [28, 72] : [40, 60]);
+  box.innerHTML = `
+    <div class="sec">一句话结论</div>
+    <p>此卦为 <strong>${r.name}</strong>，${r.brief}</p>
+    <p>就你问的这件事，整体倾向是<strong>${yaoPct[0]}% 到 ${yaoPct[1]}% 之间可成</strong>，关键不在"能不能"，而在"用不用对方式"。</p>
+    <div class="sec">卦象在说什么</div>
+    <p>上卦为 ${r.upper}${T[r.upper].e}，下卦为 ${r.lower}${T[r.lower].e}。${r.brief}</p>
+    ${r.tiYong ? `<p>体用上看：${r.tiYong}。</p>` : ''}
+    ${dongLines}
+    <div class="sec">三条建议</div>
+    <p>1. 先把最容易掌控的那一步做扎实，别一上来就摊大摊子。</p>
+    <p>2. 多找一个信得过、看得清的人商量，此卦的转机常在"人"上。</p>
+    <p>3. 给自己设一个明确的止损线或时间点，到了就按约定执行，别凭情绪改主意。</p>
+    <div class="sec">时间节奏</div>
+    <p>${r.dongs.length ? '有动爻，说明变化已经启动，宜在近期（一到两周内）行动，拖久了势头会散。' : '无动爻，节奏偏慢，宜等一等外部条件，不必强求尽快定论。'}</p>
+    <div class="sec">最该防的坑</div>
+    <p>别把"想看到的结果"当成"卦象说的结果"。此卦提醒：越是着急，越容易只听见自己想听的话。</p>
+    <p style="color:#8a8f99;font-size:12.5px">（本地卦辞模式：未配置大模型接口，以上为卦象基础断语。点右上角 ⚙ 填入 API Key，可得到结合你问题的详细解读。）</p>`;
+  $('#aiHint').textContent = '本地卦辞模式 · 已给出基础断语';
+}
+
+/* ================= 调用大模型 ================= */
+let aborter = null;
+async function callAI(r){
+  const cfg = getCfg();
+  const box = $('#aiBox');
+  if (aborter) aborter.abort();
+  if (!cfg.base){
+    renderLocal(r);
+    return;
+  }
+  const proxy = /^\/api/.test(cfg.base) || !cfg.key;
+  if (proxy && usageToday() >= DAILY_LIMIT){
+    renderLocal(r);
+    $('#aiHint').textContent = `今日 ${DAILY_LIMIT} 次已用完 · 本地卦辞模式`;
+    return;
+  }
+  box.innerHTML = '<div class="thinking">正在推演 <span>·</span><span>·</span><span>·</span></div>';
+  $('#aiHint').textContent = `${cfg.model || '模型'} · 流式解读中`;
+  aborter = new AbortController();
+  const timer = setTimeout(() => aborter.abort(), 120000);
+  let acc = '';
+  try{
+    const url = proxy
+      ? cfg.base.replace(/\/+$/, '') + '/chat'
+      : cfg.base.replace(/\/+$/, '') + '/chat/completions';
+    const headers = { 'Content-Type':'application/json' };
+    if (!proxy) headers['Authorization'] = 'Bearer ' + cfg.key;
+    const res = await fetch(url, {
+      method:'POST',
+      signal: aborter.signal,
+      headers,
+      body: JSON.stringify({
+        model: cfg.model || 'deepseek-chat',
+        stream: true,
+        temperature: 0.85,
+        messages: [
+          { role:'system', content:'你是一位精通《易经》又接地气的解卦先生，擅长用大白话把卦象讲透，语气像老朋友。' },
+          { role:'user', content: buildPrompt(r) }
+        ]
+      })
+    });
+    if (!res.ok){
+      const errText = await res.text().catch(() => '');
+      throw new Error('HTTP ' + res.status + ' ' + errText.slice(0, 160));
+    }
+    const ctype = res.headers.get('content-type') || '';
+    if (ctype.indexOf('event-stream') === -1){
+      const j = await res.json().catch(() => null);
+      const text = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+      if (!text) throw new Error((j && j.error && (j.error.message || j.error)) || '接口无返回内容');
+      acc = text;
+      let i = 0;
+      await new Promise(done => {
+        const t = setInterval(() => {
+          i += 2;
+          box.innerHTML = renderMD(acc.slice(0, i)) + '<span class="cursor"></span>';
+          box.scrollIntoView({ block:'nearest' });
+          if (i >= acc.length){ clearInterval(t); done(); }
+        }, 28);
+      });
+      box.innerHTML = renderMD(acc);
+      if (proxy) bumpUsage();
+      $('#aiHint').textContent = '解读完成';
+      return;
+    }
+    const reader = res.body.getReader();
+    const dec = new TextDecoder('utf-8');
+    let buf = '';
+    while (true){
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream:true });
+      const parts = buf.split('\n');
+      buf = parts.pop();
+      for (const line of parts){
+        const s = line.trim();
+        if (!s.startsWith('data:')) continue;
+        const data = s.slice(5).trim();
+        if (data === '[DONE]') continue;
+        try{
+          const j = JSON.parse(data);
+          const delta = j.choices && j.choices[0] && j.choices[0].delta;
+          if (delta && delta.content){
+            acc += delta.content;
+            box.innerHTML = renderMD(acc) + '<span class="cursor"></span>';
+            box.scrollIntoView({ block:'nearest' });
+          }
+        }catch(e){ /* 忽略半包 */ }
+      }
+    }
+    if (!acc.trim()){
+      box.innerHTML = '<p>接口没有返回内容，请检查模型名或额度。</p>';
+      renderLocalNote();
+      return;
+    }
+    box.innerHTML = renderMD(acc);
+    if (proxy) bumpUsage();
+    $('#aiHint').textContent = '解读完成';
+  }catch(err){
+    if (err.name === 'AbortError'){
+      if (!acc) { box.innerHTML = '<p>请求超时或被中断。</p>'; renderLocalNote(); }
+      return;
+    }
+    box.innerHTML = `<p style="color:#c9605a">调用失败：${esc(String(err.message || err))}</p>` + renderMD(acc);
+    renderLocalNote();
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
+function renderLocalNote(){
+  const note = document.createElement('p');
+  note.style.cssText = 'color:#8a8f99;font-size:12.5px;margin-top:12px';
+  note.textContent = '可点右上角 ⚙ 检查接口地址 / 模型名 / API Key，或先看下面的本地断语。';
+  $('#aiBox').appendChild(note);
+  const r = S.result;
+  if (r) $('#aiBox').insertAdjacentHTML('beforeend',
+    `<div class="sec">本地卦辞断语</div><p><strong>${r.name}</strong>：${r.brief}</p>` +
+    (r.tiYong ? `<p>体用：${r.tiYong}</p>` : ''));
+}
+/* ================= 起卦调度 ================= */
+const trigramByNum = n => ORDER[((n - 1) % 8 + 8) % 8];
+
+async function doCast(){
+  if (S.busy) return;
+  const m = S.method;
+  const btn = $('#doCast');
+  S.busy = true;
+  btn.disabled = true;
+  btn.textContent = m === 'coin' ? '摇 卦 中…' : '推 演 中…';
+  try{
+    let r;
+    if (m === 'time'){
+      const t = timeNumbers();
+      r = buildGua(trigramByNum(t.low), trigramByNum(t.up), t.dong, 'time', `${t.desc}\n${t.detail}`);
+    } else if (m === 'num'){
+      const nums = ($('#numInput').value.match(/\d+/g) || []).map(Number);
+      if (nums.length < 2){ toast('请至少报两个数字'); return; }
+      const t = numberNumbers(nums);
+      r = buildGua(trigramByNum(t.low), trigramByNum(t.up), t.dong, 'num', t.detail);
+    } else if (m === 'text'){
+      const txt = $('#textInput').value.trim();
+      const t = textNumbers(txt);
+      if (!t){ toast('请至少写两个字'); return; }
+      r = buildGua(trigramByNum(t.low), trigramByNum(t.up), t.dong, 'text', `原句「${txt}」\n${t.detail}`);
+    } else {
+      r = await castCoin();
+    }
+    renderResult(r);
+    $('#aiBox').innerHTML = '';
+    $('#aiTitle').textContent = '小易解卦';
+    goStep(3);
+    await callAI(r);
+  }finally{
+    S.busy = false;
+    btn.disabled = false;
+    btn.textContent = '起 卦';
+  }
+}
+
+/* ================= 设置面板 ================= */
+const PRESETS = {
+  deepseek:{ base:'https://api.deepseek.com/v1', model:'deepseek-chat' },
+  qwen:{ base:'https://dashscope.aliyuncs.com/compatible-mode/v1', model:'qwen-plus' },
+  kimi:{ base:'https://api.moonshot.cn/v1', model:'moonshot-v1-8k' }
+};
+function openSet(){
+  const c = getCfg();
+  $('#setBase').value = c.base || '';
+  $('#setModel').value = c.model || '';
+  $('#setKey').value = c.key || '';
+  $('#settings').classList.remove('hidden');
+}
+
+/* ================= 初始化 ================= */
+const QS = ['这段感情还能继续吗','这份工作要不要换','这次合作/投资能成吗','考试面试能否通过','最近身体状况如何','要不要搬到另一个城市','今年财运怎么样','丢失的东西还能找回吗'];
+
+function updateTimePreview(){
+  const t = timeNumbers();
+  $('#timePreview').textContent = `${t.desc}　→　上卦数 ${t.up} · 下卦数 ${t.low} · 动爻 ${t.dong}`;
+}
+
+function init(){
+  $('#qChips').innerHTML = QS.map(q => `<span class="chip">${q}</span>`).join('');
+  $('#qChips').addEventListener('click', e => {
+    if (!e.target.classList.contains('chip')) return;
+    $('#question').value = e.target.textContent;
+    $('#question').focus();
+  });
+
+  $('#toStep2').onclick = () => {
+    const q = $('#question').value.trim();
+    if (!q){ toast('先写下你想问的事'); $('#question').focus(); return; }
+    S.q = q;
+    updateTimePreview();
+    goStep(2);
+  };
+  $('#question').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) $('#toStep2').click();
+  });
+
+  $('#methods').addEventListener('click', e => {
+    const el = e.target.closest('.method');
+    if (!el) return;
+    $$('.method').forEach(m => m.classList.toggle('on', m === el));
+    S.method = el.dataset.m;
+    ['Time','Num','Text','Coin'].forEach(k => {
+      $('#panel' + k).classList.toggle('hidden', k.toLowerCase() !== S.method);
+    });
+    $('#doCast').textContent = S.method === 'coin' ? '摇 卦' : '起 卦';
+  });
+
+  $('#refreshTime').onclick = () => { updateTimePreview(); toast('已按此刻重新取数'); };
+  $('#randNum').onclick = () => {
+    $('#numInput').value = [randInt(99), randInt(99), randInt(6)].join(' ');
+  };
+  $('#back1').onclick = () => goStep(1);
+  $('#doCast').onclick = doCast;
+
+  $('#againAI').onclick = () => { if (S.result) callAI(S.result); };
+  $('#newCast').onclick = () => {
+    if (aborter) aborter.abort();
+    $('#aiBox').innerHTML = '';
+    $('#castTitle').textContent = '六爻未起';
+    $('#liveLines').innerHTML = '';
+    $('#doCast').textContent = S.method === 'coin' ? '摇 卦' : '起 卦';
+    updateTimePreview();
+    goStep(2);
+  };
+
+  $('#gearBtn').onclick = openSet;
+  $('#closeSet').onclick = () => $('#settings').classList.add('hidden');
+
+  /* ---- 隐藏的管理入口：连点标题 5 次，或访问 ?admin=1 ---- */
+  const ADMIN_KEY = 'qigua_admin';
+  if (location.search.indexOf('admin=1') >= 0) localStorage.setItem(ADMIN_KEY, '1');
+  if (localStorage.getItem(ADMIN_KEY) === '1') $('#gearBtn').style.display = '';
+
+  let tapCount = 0;
+  let tapTimer = null;
+  $('#brandTitle').addEventListener('click', () => {
+    if (localStorage.getItem(ADMIN_KEY) === '1') return;
+    tapCount++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(() => { tapCount = 0; }, 2500);
+    if (tapCount >= 5) {
+      localStorage.setItem(ADMIN_KEY, '1');
+      $('#gearBtn').style.display = '';
+      tapCount = 0;
+      toast('管理入口已开启');
+    }
+  });
+
+  $('#presetDeepseek').onclick = () => { $('#setBase').value = PRESETS.deepseek.base; $('#setModel').value = PRESETS.deepseek.model; };
+  $('#presetQwen').onclick = () => { $('#setBase').value = PRESETS.qwen.base; $('#setModel').value = PRESETS.qwen.model; };
+  $('#presetKimi').onclick = () => { $('#setBase').value = PRESETS.kimi.base; $('#setModel').value = PRESETS.kimi.model; };
+  $('#saveSet').onclick = () => {
+    const c = {
+      base: $('#setBase').value.trim(),
+      model: $('#setModel').value.trim() || 'deepseek-chat',
+      key: $('#setKey').value.trim()
+    };
+    saveCfg(c);
+    $('#settings').classList.add('hidden');
+    toast(c.key ? '已保存，将使用大模型解读' : '已保存（未填 Key，使用本地卦辞）');
+  };
+
+  updateTimePreview();
+  setInterval(updateTimePreview, 1000);
+}
+
+init();
+
+/* 支持“添加到主屏幕”（需 http/https 环境，本地文件打开时自动跳过） */
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
