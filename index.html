@@ -154,6 +154,51 @@
   .thinking span:nth-child(2){animation-delay:.15s}
   .thinking span:nth-child(3){animation-delay:.3s}
   @keyframes bob{0%,100%{opacity:.25}50%{opacity:1}}
+  /* ---------- 多轮对话 ---------- */
+  .chat-area{margin-top:18px}
+  .chat-divider{
+    display:flex;align-items:center;gap:12px;margin-bottom:14px;
+    color:var(--gold);font-size:13px;letter-spacing:.08em;
+  }
+  .chat-divider::before,.chat-divider::after{
+    content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);
+  }
+  .chat-messages{max-height:420px;overflow-y:auto;margin-bottom:12px;display:flex;flex-direction:column;gap:12px}
+  .chat-msg{display:flex;flex-direction:column;gap:4px;animation:fadeUp .3s ease both}
+  .chat-msg .msg-label{font-size:11px;color:var(--dim);letter-spacing:.06em}
+  .chat-msg .msg-body{
+    padding:12px 14px;border-radius:14px;font-size:13.5px;line-height:1.85;
+    word-break:break-word;white-space:pre-wrap;
+  }
+  .chat-msg.user{align-items:flex-end}
+  .chat-msg.user .msg-body{
+    background:linear-gradient(135deg,rgba(217,178,106,.18),rgba(217,178,106,.08));
+    border:1px solid rgba(217,178,106,.25);color:var(--gold-2);
+    border-bottom-right-radius:4px;max-width:88%;
+  }
+  .chat-msg.ai{align-items:flex-start}
+  .chat-msg.ai .msg-body{
+    background:rgba(255,255,255,.035);border:1px solid var(--line);color:#d7d2c7;
+    border-bottom-left-radius:4px;max-width:92%;
+  }
+  .chat-msg.ai .msg-body p{margin:0 0 8px}
+  .chat-msg.ai .msg-body p:last-child{margin-bottom:0}
+  .chat-msg.ai .msg-body strong{color:var(--gold-2)}
+  .chat-input-row{display:flex;gap:8px;align-items:center}
+  .chat-input{
+    flex:1;background:#0b0e13;border:1px solid #28303e;border-radius:12px;
+    color:var(--text);font-size:14px;padding:12px 14px;font-family:inherit;
+    outline:none;transition:.2s;
+  }
+  .chat-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,178,106,.12)}
+  .chat-input::placeholder{color:#5a6070}
+  .chat-input:disabled{opacity:.5}
+  #chatSend{white-space:nowrap;padding:12px 18px}
+  #chatSend:disabled{opacity:.5;cursor:not-allowed}
+  .chat-typing{color:var(--dim);font-size:12px;padding:8px 0;display:flex;align-items:center;gap:6px}
+  .chat-typing span{animation:bob 1.2s infinite}
+  .chat-typing span:nth-child(2){animation-delay:.15s}
+  .chat-typing span:nth-child(3){animation-delay:.3s}
   /* ---------- 设置 ---------- */
   .set-item{margin-bottom:12px}
   .set-item label{display:block;font-size:12px;color:var(--dim);margin-bottom:6px;letter-spacing:.06em}
@@ -308,6 +353,17 @@
       <h2 id="aiTitle">小易解卦</h2>
       <p class="hint" id="aiHint">正在为你推演…</p>
       <div id="aiBox" class="ai-box"></div>
+
+      <!-- 多轮对话区域 -->
+      <div id="chatArea" class="chat-area" style="display:none">
+        <div class="chat-divider"><span>继续追问</span></div>
+        <div id="chatMessages" class="chat-messages"></div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" class="chat-input" placeholder="针对这个卦象，继续问..." />
+          <button class="btn gold sm" id="chatSend">发送</button>
+        </div>
+      </div>
+
       <div class="row">
         <button class="btn ghost sm" id="againAI">重新解读</button>
         <button class="btn ghost sm" id="newCast">再起一卦</button>
@@ -900,6 +956,33 @@ function renderLocal(r){
 
 /* ================= 调用大模型 ================= */
 let aborter = null;
+let chatHistory = [];  // 多轮对话历史
+let currentResult = null;  // 当前卦象结果
+
+function resetChat(){
+  chatHistory = [];
+  currentResult = null;
+  $('#chatArea').style.display = 'none';
+  $('#chatMessages').innerHTML = '';
+  $('#chatInput').value = '';
+}
+
+function showChatArea(){
+  $('#chatArea').style.display = '';
+  $('#chatInput').focus();
+}
+
+function appendChatMsg(role, text){
+  const wrap = $('#chatMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + (role === 'user' ? 'user' : 'ai');
+  const label = role === 'user' ? '你' : '小易';
+  div.innerHTML = `<div class="msg-label">${label}</div><div class="msg-body">${role === 'user' ? esc(text) : renderMD(text)}</div>`;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+  return div.querySelector('.msg-body');
+}
+
 async function callAI(r){
   const cfg = getCfg();
   const box = $('#aiBox');
@@ -961,6 +1044,14 @@ async function callAI(r){
       box.innerHTML = renderMD(acc);
       if (proxy) bumpUsage();
       $('#aiHint').textContent = '解读完成';
+      // 保存对话历史，显示多轮对话区域
+      currentResult = r;
+      chatHistory = [
+        { role:'system', content:'你是一位精通《易经》又接地气的解卦先生，擅长用大白话把卦象讲透，语气像老朋友。' },
+        { role:'user', content: buildPrompt(r) },
+        { role:'assistant', content: acc }
+      ];
+      showChatArea();
       return;
     }
     const reader = res.body.getReader();
@@ -996,6 +1087,14 @@ async function callAI(r){
     box.innerHTML = renderMD(acc);
     if (proxy) bumpUsage();
     $('#aiHint').textContent = '解读完成';
+    // 保存对话历史，显示多轮对话区域
+    currentResult = r;
+    chatHistory = [
+      { role:'system', content:'你是一位精通《易经》又接地气的解卦先生，擅长用大白话把卦象讲透，语气像老朋友。' },
+      { role:'user', content: buildPrompt(r) },
+      { role:'assistant', content: acc }
+    ];
+    showChatArea();
   }catch(err){
     if (err.name === 'AbortError'){
       if (!acc) { box.innerHTML = '<p>请求超时或被中断。</p>'; renderLocalNote(); }
@@ -1017,6 +1116,97 @@ function renderLocalNote(){
   if (r) $('#aiBox').insertAdjacentHTML('beforeend',
     `<div class="sec">本地卦辞断语</div><p><strong>${r.name}</strong>：${r.brief}</p>` +
     (r.tiYong ? `<p>体用：${r.tiYong}</p>` : ''));
+}
+
+/* ================= 多轮追问 ================= */
+let followUpBusy = false;
+async function sendFollowUp(){
+  const input = $('#chatInput');
+  const q = input.value.trim();
+  if (!q || followUpBusy || !chatHistory.length) return;
+
+  const cfg = getCfg();
+  const proxy = /^\/api/.test(cfg.base) || !cfg.key;
+  if (proxy && usageToday() >= DAILY_LIMIT){
+    appendChatMsg('ai', `今日 ${DAILY_LIMIT} 次已用完，明天再来吧。`);
+    return;
+  }
+
+  followUpBusy = true;
+  input.value = '';
+  input.disabled = true;
+  $('#chatSend').disabled = true;
+
+  appendChatMsg('user', q);
+  chatHistory.push({ role:'user', content:q });
+
+  // 显示"正在思考"
+  const wrap = $('#chatMessages');
+  const typing = document.createElement('div');
+  typing.className = 'chat-typing';
+  typing.innerHTML = '小易正在思考 <span>·</span><span>·</span><span>·</span>';
+  wrap.appendChild(typing);
+  wrap.scrollTop = wrap.scrollHeight;
+
+  const aborter2 = new AbortController();
+  const timer = setTimeout(() => aborter2.abort(), 120000);
+
+  try{
+    const url = proxy
+      ? cfg.base.replace(/\/+$/, '') + '/chat'
+      : cfg.base.replace(/\/+$/, '') + '/chat/completions';
+    const headers = { 'Content-Type':'application/json' };
+    if (!proxy) headers['Authorization'] = 'Bearer ' + cfg.key;
+
+    const res = await fetch(url, {
+      method:'POST',
+      signal: aborter2.signal,
+      headers,
+      body: JSON.stringify({
+        model: cfg.model || 'deepseek-chat',
+        stream: false,
+        temperature: 0.85,
+        messages: chatHistory
+      })
+    });
+
+    typing.remove();
+
+    if (!res.ok){
+      const errText = await res.text().catch(() => '');
+      throw new Error('HTTP ' + res.status + ' ' + errText.slice(0, 160));
+    }
+
+    const j = await res.json().catch(() => null);
+    const text = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+    if (!text) throw new Error((j && j.error && (j.error.message || j.error)) || '接口无返回内容');
+
+    chatHistory.push({ role:'assistant', content:text });
+    const body = appendChatMsg('ai', '');
+
+    // 打字机效果
+    let i = 0;
+    await new Promise(done => {
+      const t = setInterval(() => {
+        i += 2;
+        body.innerHTML = renderMD(text.slice(0, i));
+        wrap.scrollTop = wrap.scrollHeight;
+        if (i >= text.length){ clearInterval(t); done(); }
+      }, 24);
+    });
+    body.innerHTML = renderMD(text);
+    if (proxy) bumpUsage();
+  }catch(err){
+    typing.remove();
+    const msg = err.name === 'AbortError' ? '请求超时，请重试' : String(err.message || err);
+    appendChatMsg('ai', `出错了：${msg}`);
+  }finally{
+    clearTimeout(timer);
+    followUpBusy = false;
+    input.disabled = false;
+    $('#chatSend').disabled = false;
+    input.focus();
+  }
 }
 /* ================= 起卦调度 ================= */
 const trigramByNum = n => ORDER[((n - 1) % 8 + 8) % 8];
@@ -1046,6 +1236,7 @@ async function doCast(){
     } else {
       r = await castCoin();
     }
+    resetChat();
     renderResult(r);
     $('#aiBox').innerHTML = '';
     $('#aiTitle').textContent = '小易解卦';
@@ -1117,9 +1308,10 @@ function init(){
   $('#back1').onclick = () => goStep(1);
   $('#doCast').onclick = doCast;
 
-  $('#againAI').onclick = () => { if (S.result) callAI(S.result); };
+  $('#againAI').onclick = () => { resetChat(); if (S.result) callAI(S.result); };
   $('#newCast').onclick = () => {
     if (aborter) aborter.abort();
+    resetChat();
     $('#aiBox').innerHTML = '';
     $('#castTitle').textContent = '六爻未起';
     $('#liveLines').innerHTML = '';
@@ -1127,6 +1319,12 @@ function init(){
     updateTimePreview();
     goStep(2);
   };
+
+  /* ---- 多轮对话事件 ---- */
+  $('#chatSend').onclick = sendFollowUp;
+  $('#chatInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendFollowUp(); }
+  });
 
   $('#gearBtn').onclick = openSet;
   $('#closeSet').onclick = () => $('#settings').classList.add('hidden');

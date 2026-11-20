@@ -1,4 +1,4 @@
-const CACHE = 'qigegua-v2';
+const CACHE = 'xuanyige-v1';
 const ASSETS = ['./', './index.html', './icon-192.png', './icon-512.png', './manifest.webmanifest'];
 
 self.addEventListener('install', event => {
@@ -19,22 +19,7 @@ self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  if (url.origin !== location.origin) return; // 接口与外部资源不缓存
-
-  // 页面走「先网络后缓存」，保证发版后能立即更新
-  const isPage = req.mode === 'navigate' || /\.html?$/.test(url.pathname) || url.pathname.endsWith('/');
-  if (isPage) {
-    event.respondWith(
-      fetch(req)
-        .then(res => {
-          const copy = res.clone();
-          caches.open(CACHE).then(c => c.put(req, copy));
-          return res;
-        })
-        .catch(() => caches.match(req).then(hit => hit || caches.match('./index.html')))
-    );
-    return;
-  }
+  if (url.origin !== location.origin) return; // 大模型接口不缓存
 
   event.respondWith(
     caches.match(req).then(hit => {
@@ -43,7 +28,7 @@ self.addEventListener('fetch', event => {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(req, copy));
         return res;
-      });
+      }).catch(() => caches.match('./index.html'));
     })
   );
 });
