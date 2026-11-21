@@ -199,6 +199,34 @@
   .chat-typing span{animation:bob 1.2s infinite}
   .chat-typing span:nth-child(2){animation-delay:.15s}
   .chat-typing span:nth-child(3){animation-delay:.3s}
+  /* ---------- 付费解锁 ---------- */
+  .chat-locked{
+    border:1px dashed rgba(217,178,106,.32);border-radius:14px;padding:16px;
+    text-align:center;background:rgba(217,178,106,.04);
+  }
+  .chat-locked .lk-title{font-size:14px;color:var(--gold-2);letter-spacing:.06em;margin-bottom:6px}
+  .chat-locked .lk-desc{font-size:12.5px;color:var(--dim);line-height:1.7;margin-bottom:12px}
+  .chat-locked .btn{width:auto;display:inline-flex;padding:10px 18px}
+  .pay-mask{position:fixed;inset:0;z-index:60;background:rgba(6,8,12,.9);backdrop-filter:blur(8px);overflow:auto;display:none}
+  .pay-mask.on{display:block}
+  .pay-wrap{max-width:420px;margin:0 auto;padding:28px 16px 48px}
+  .pay-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+  .pay-title{font-family:"Songti SC","STSong",serif;font-size:19px;color:var(--gold-2);letter-spacing:.1em;margin:0 0 4px}
+  .pay-price{font-size:28px;color:var(--gold-2);font-weight:700;line-height:1.2}
+  .pay-price small{font-size:13px;color:var(--dim);font-weight:400;margin-left:4px}
+  .pay-desc{font-size:13px;color:var(--dim);margin:10px 0 14px;line-height:1.8}
+  .pay-qrs{display:flex;gap:10px;margin:10px 0}
+  .pay-qr-item{flex:1;text-align:center;font-size:12px;color:var(--dim)}
+  .pay-qr-item img{width:100%;border-radius:12px;background:#fff;padding:5px;display:block;margin-bottom:4px}
+  .pay-code{margin-top:14px;border-top:1px dashed rgba(217,178,106,.2);padding-top:14px}
+  .pay-code label{font-size:12px;color:var(--dim);display:block;margin-bottom:6px}
+  .pay-code input{
+    width:100%;background:#0b0e13;border:1px solid #28303e;border-radius:10px;color:var(--text);
+    padding:12px 14px;font-size:14px;font-family:inherit;letter-spacing:.08em;outline:none;transition:.2s;
+  }
+  .pay-code input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,178,106,.12)}
+  .pay-btns{display:flex;gap:10px;margin-top:12px}
+  .pay-btns .btn{flex:1}
   /* ---------- 设置 ---------- */
   .set-item{margin-bottom:12px}
   .set-item label{display:block;font-size:12px;color:var(--dim);margin-bottom:6px;letter-spacing:.06em}
@@ -357,8 +385,13 @@
       <!-- 多轮对话区域 -->
       <div id="chatArea" class="chat-area" style="display:none">
         <div class="chat-divider"><span>继续追问</span></div>
+        <div id="chatLocked" class="chat-locked">
+          <div class="lk-title">继续追问 · 高级功能</div>
+          <div class="lk-desc">解锁后可围绕这一卦持续向小易提问，一次解锁永久可用。</div>
+          <button class="btn gold sm" id="unlockChat">¥19.9 永久解锁追问</button>
+        </div>
         <div id="chatMessages" class="chat-messages"></div>
-        <div class="chat-input-row">
+        <div class="chat-input-row" id="chatInputRow" style="display:none">
           <input type="text" id="chatInput" class="chat-input" placeholder="针对这个卦象，继续问..." />
           <button class="btn gold sm" id="chatSend">发送</button>
         </div>
@@ -410,6 +443,38 @@
       <p class="hint" style="margin:12px 0 0">
         不填也能用：会自动切换为「本地卦辞模式」，给出卦象与基础断语。
       </p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 付费解锁 ============ -->
+<div id="payMask" class="pay-mask">
+  <div class="pay-wrap">
+    <div class="pay-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div>
+          <h3 class="pay-title" id="payTitle">解锁更多次数</h3>
+          <div class="pay-price"><span id="payPrice">9.9</span><small>元</small></div>
+        </div>
+        <button class="btn ghost sm" id="closePay" style="width:auto;padding:8px 14px">关闭</button>
+      </div>
+      <p class="pay-desc" id="payDesc"></p>
+      <div class="pay-qrs" id="payQrs">
+        <div class="pay-qr-item">
+          <img src="pay-wechat.png" alt="微信收款码" onerror="this.parentNode.style.display='none'" />
+          <div>微信支付</div>
+        </div>
+        <div class="pay-qr-item">
+          <img src="pay-alipay.png" alt="支付宝收款码" onerror="this.parentNode.style.display='none'" />
+          <div>支付宝</div>
+        </div>
+      </div>
+      <p class="pay-desc">付款后加微信号 <strong id="payWx" style="color:var(--gold-2)">（待配置）</strong> 索取激活码，输入下方即可解锁。</p>
+      <div class="pay-code">
+        <label>已有激活码？</label>
+        <input type="text" id="payCode" placeholder="QG-A-XXXXXX-XXXXXXXX" autocapitalize="characters" autocomplete="off" spellcheck="false" />
+        <div class="pay-btns"><button class="btn" id="redeemBtn">立即解锁</button></div>
+      </div>
     </div>
   </div>
 </div>
@@ -834,9 +899,14 @@ const DEFAULT_CFG = {
   model: 'deepseek-chat',
   key: ''
 };
-/* 每日免费次数（仅拦截普通用户，非安全边界） */
-const DAILY_LIMIT = 9999;
+/* ================= 免费额度与付费解锁 ================= */
+/* 说明：额度与权益存在浏览器本地，仅作产品限制，非安全边界 */
+const FREE_LIMIT = 3;        // 每天免费次数
+const PLUS_LIMIT = 8;        // 9.9 买断后每天次数
 const USAGE_KEY = 'qigua_usage_v1';
+const ENT_KEY = 'qigua_ent_v1';
+const CODE_SECRET = 'x8Fq2LmZ7VtR';
+const CONTACT_WX = '（待配置）';  // 收款后发码的微信号
 function usageToday(){
   try{
     const u = JSON.parse(localStorage.getItem(USAGE_KEY)) || {};
@@ -849,6 +919,41 @@ function bumpUsage(){
   const n = usageToday() + 1;
   localStorage.setItem(USAGE_KEY, JSON.stringify({ d, n }));
   return n;
+}
+/* 已购权益：plus5=每天8次，chat=永久解锁追问 */
+function getEnt(){
+  try{ return JSON.parse(localStorage.getItem(ENT_KEY)) || {}; }catch(e){ return {}; }
+}
+function setEnt(o){ localStorage.setItem(ENT_KEY, JSON.stringify(o)); }
+function dailyLimit(){ return getEnt().plus5 ? PLUS_LIMIT : FREE_LIMIT; }
+function remainToday(){ return Math.max(0, dailyLimit() - usageToday()); }
+/* 激活码签名（与本地发码工具保持一致） */
+function codeSig(type, serial){
+  const s = type + '|' + serial + '|' + CODE_SECRET;
+  let h1 = 0x811c9dc5, h2 = 0x1000193;
+  for (let i = 0; i < s.length; i++){
+    const c = s.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 16777619) >>> 0;
+    h2 = (Math.imul(h2, 33) + c) >>> 0;
+  }
+  const raw = (h1.toString(36) + h2.toString(36)).toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return (raw + 'ABCDEFGH').slice(0, 8);
+}
+function redeem(code){
+  const parts = String(code || '').trim().toUpperCase().replace(/\s+/g, '').split('-');
+  if (parts.length !== 4 || parts[0] !== 'QG') return { ok:false, msg:'激活码格式不对，请检查后重试' };
+  const type = parts[1], serial = parts[2];
+  if ((type !== 'A' && type !== 'C') || serial.length !== 6) return { ok:false, msg:'激活码格式不对，请检查后重试' };
+  if (codeSig(type, serial) !== parts[3]) return { ok:false, msg:'激活码无效，请核对后重试' };
+  const e = getEnt();
+  if (type === 'A'){
+    if (e.plus5) return { ok:true, msg:'该权益已解锁，无需重复使用' };
+    e.plus5 = true; setEnt(e);
+    return { ok:true, type:'A', msg:'解锁成功：每天 8 次' };
+  }
+  if (e.chat) return { ok:true, msg:'该权益已解锁，无需重复使用' };
+  e.chat = true; setEnt(e);
+  return { ok:true, type:'C', msg:'解锁成功：继续追问' };
 }
 function getCfg(){
   let saved = {};
@@ -968,8 +1073,40 @@ function resetChat(){
 }
 
 function showChatArea(){
+  const unlocked = !!getEnt().chat;
   $('#chatArea').style.display = '';
-  $('#chatInput').focus();
+  $('#chatLocked').style.display = unlocked ? 'none' : '';
+  $('#chatInputRow').style.display = unlocked ? '' : 'none';
+  if (unlocked) $('#chatInput').focus();
+}
+
+/* ---------- 付费弹窗 ---------- */
+let payKind = 'A';
+function openPay(kind){
+  payKind = kind === 'C' ? 'C' : 'A';
+  const isChat = payKind === 'C';
+  $('#payTitle').textContent = isChat ? '解锁「继续追问」' : '今日次数已用完';
+  $('#payPrice').textContent = isChat ? '19.9' : '9.9';
+  $('#payDesc').innerHTML = isChat
+    ? '一次买断，永久解锁继续追问：解卦之后可以围绕这一卦随时追问小易。追问同样计入每日次数。'
+    : `每天免费 ${FREE_LIMIT} 次已用完。一次买断，之后每天可用 ${PLUS_LIMIT} 次，永久有效。`;
+  $('#payWx').textContent = CONTACT_WX;
+  $('#payCode').value = '';
+  $('#payMask').classList.add('on');
+}
+function closePay(){ $('#payMask').classList.remove('on'); }
+function applyRedeem(){
+  const r = redeem($('#payCode').value);
+  if (!r.ok){ toast(r.msg); return; }
+  closePay();
+  if (r.type === 'C'){
+    showChatArea();
+    toast('解锁成功：可以继续追问了');
+    return;
+  }
+  $('#aiHint').textContent = `已提升至每天 ${PLUS_LIMIT} 次 · 今日剩余 ${remainToday()} 次`;
+  toast(r.msg);
+  if (remainToday() > 0 && S.result) callAI(S.result);
 }
 
 function appendChatMsg(role, text){
@@ -992,9 +1129,10 @@ async function callAI(r){
     return;
   }
   const proxy = /^\/api/.test(cfg.base) || !cfg.key;
-  if (proxy && usageToday() >= DAILY_LIMIT){
+  if (proxy && usageToday() >= dailyLimit()){
     renderLocal(r);
-    $('#aiHint').textContent = `今日 ${DAILY_LIMIT} 次已用完 · 本地卦辞模式`;
+    $('#aiHint').textContent = '今日次数已用完 · 本地卦辞模式';
+    openPay('A');
     return;
   }
   box.innerHTML = '<div class="thinking">正在推演 <span>·</span><span>·</span><span>·</span></div>';
@@ -1086,7 +1224,7 @@ async function callAI(r){
     }
     box.innerHTML = renderMD(acc);
     if (proxy) bumpUsage();
-    $('#aiHint').textContent = '解读完成';
+    $('#aiHint').textContent = '解读完成 · 今日剩余 ' + remainToday() + ' 次';
     // 保存对话历史，显示多轮对话区域
     currentResult = r;
     chatHistory = [
@@ -1124,11 +1262,13 @@ async function sendFollowUp(){
   const input = $('#chatInput');
   const q = input.value.trim();
   if (!q || followUpBusy || !chatHistory.length) return;
+  if (!getEnt().chat){ openPay('C'); return; }
 
   const cfg = getCfg();
   const proxy = /^\/api/.test(cfg.base) || !cfg.key;
-  if (proxy && usageToday() >= DAILY_LIMIT){
-    appendChatMsg('ai', `今日 ${DAILY_LIMIT} 次已用完，明天再来吧。`);
+  if (proxy && usageToday() >= dailyLimit()){
+    appendChatMsg('ai', '今日次数已用完，明天再来，也可以解锁更多次数。');
+    openPay('A');
     return;
   }
 
@@ -1324,6 +1464,17 @@ function init(){
   $('#chatSend').onclick = sendFollowUp;
   $('#chatInput').addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendFollowUp(); }
+  });
+
+  /* ---- 付费解锁事件 ---- */
+  $('#closePay').onclick = closePay;
+  $('#redeemBtn').onclick = applyRedeem;
+  $('#unlockChat').onclick = () => openPay('C');
+  $('#payCode').addEventListener('keydown', e => {
+    if (e.key === 'Enter'){ e.preventDefault(); applyRedeem(); }
+  });
+  $('#payMask').addEventListener('click', e => {
+    if (e.target === $('#payMask')) closePay();
   });
 
   $('#gearBtn').onclick = openSet;
