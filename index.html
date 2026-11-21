@@ -459,6 +459,8 @@
         <button class="btn ghost sm" id="closePay" style="width:auto;padding:8px 14px">关闭</button>
       </div>
       <p class="pay-desc" id="payDesc"></p>
+      <button class="btn" id="buyBtn">去购买 · 自动发码</button>
+      <p class="pay-desc" style="margin:8px 0 0;font-size:12px">付款成功后页面会立即显示激活码，复制后回来粘贴即可。</p>
       <div class="pay-qrs" id="payQrs">
         <div class="pay-qr-item">
           <img src="pay-wechat.png" alt="微信收款码" onerror="this.parentNode.style.display='none'" />
@@ -469,11 +471,14 @@
           <div>支付宝</div>
         </div>
       </div>
-      <p class="pay-desc">付款后加微信号 <strong id="payWx" style="color:var(--gold-2)">（待配置）</strong> 索取激活码，输入下方即可解锁。</p>
+      <p class="pay-desc">付款页面会自动显示激活码；若遇到问题，可联系微信 <strong id="payWx" style="color:var(--gold-2)">（待配置）</strong>。</p>
       <div class="pay-code">
         <label>已有激活码？</label>
         <input type="text" id="payCode" placeholder="QG-A-XXXXXX-XXXXXXXX" autocapitalize="characters" autocomplete="off" spellcheck="false" />
-        <div class="pay-btns"><button class="btn" id="redeemBtn">立即解锁</button></div>
+        <div class="pay-btns">
+          <button class="btn ghost" id="pasteCode" style="flex:0 0 auto;width:auto;padding:12px 16px">粘贴</button>
+          <button class="btn" id="redeemBtn">立即解锁</button>
+        </div>
       </div>
     </div>
   </div>
@@ -907,6 +912,11 @@ const USAGE_KEY = 'qigua_usage_v1';
 const ENT_KEY = 'qigua_ent_v1';
 const CODE_SECRET = 'x8Fq2LmZ7VtR';
 const CONTACT_WX = '（待配置）';  // 收款后发码的微信号
+/* 发卡平台商品链接：付款后由平台自动发放激活码 */
+const SHOP_URL = {
+  A: '',   // 9.9 元 / 每天 8 次
+  C: ''    // 19.9 元 / 永久解锁追问
+};
 function usageToday(){
   try{
     const u = JSON.parse(localStorage.getItem(USAGE_KEY)) || {};
@@ -1092,6 +1102,11 @@ function openPay(kind){
     : `每天免费 ${FREE_LIMIT} 次已用完。一次买断，之后每天可用 ${PLUS_LIMIT} 次，永久有效。`;
   $('#payWx').textContent = CONTACT_WX;
   $('#payCode').value = '';
+  const url = SHOP_URL[payKind] || '';
+  $('#buyBtn').onclick = () => {
+    if (!url){ toast('购买链接还没配置，请稍后再试'); return; }
+    window.open(url, '_blank', 'noopener');
+  };
   $('#payMask').classList.add('on');
 }
 function closePay(){ $('#payMask').classList.remove('on'); }
@@ -1470,6 +1485,17 @@ function init(){
   $('#closePay').onclick = closePay;
   $('#redeemBtn').onclick = applyRedeem;
   $('#unlockChat').onclick = () => openPay('C');
+  $('#pasteCode').onclick = async () => {
+    try{
+      const t = await navigator.clipboard.readText();
+      if (!t || !t.trim()){ toast('剪贴板是空的'); return; }
+      $('#payCode').value = t.trim();
+      toast('已粘贴，点「立即解锁」');
+    }catch(e){
+      toast('无法读取剪贴板，请长按输入框手动粘贴');
+      $('#payCode').focus();
+    }
+  };
   $('#payCode').addEventListener('keydown', e => {
     if (e.key === 'Enter'){ e.preventDefault(); applyRedeem(); }
   });
