@@ -1145,7 +1145,7 @@ async function submitOrder(){
     if (!res.ok || !data.id) throw new Error(data.msg || '提交失败');
     curOrder = { id: data.id, type: payKind, ts: Date.now() };
     rememberOrder(curOrder);
-    setOrderWait(true, '订单号 ' + data.id + ' · ¥' + data.amount, '已提交，等待确认…');
+    setOrderWait(true, '订单号 ' + data.id + ' · ¥' + data.amount, data.auto ? '夜间自动开通中…' : '已提交，等待确认…');
     pollOrder();
     pollTimer = setInterval(pollOrder, 4000);
   }catch(e){
