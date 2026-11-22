@@ -1,4 +1,4 @@
-const CACHE = 'xuanyige-v2';
+const CACHE = 'xuanyige-v3';
 const ASSETS = ['./', './index.html', './icon-192.png', './icon-512.png', './manifest.webmanifest'];
 
 self.addEventListener('install', event => {
@@ -20,6 +20,7 @@ self.addEventListener('fetch', event => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return; // 大模型接口不缓存
+  if (url.pathname.startsWith('/api/')) return; // 订单/接口请求永不走缓存
 
   const isDoc = req.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('/index.html');
 
