@@ -113,7 +113,7 @@ exports.handler = async (event) => {
       await s.setJSON(id, order);
 
       const link = SITE + '/api/order?action=approve&id=' + id + '&sig=' + sign(id);
-      pushFeishu(
+      await pushFeishu(
         '【起个卦】新订单 ¥' + order.amount + ' · ' + LABEL[type] + '\n订单号 ' + id + '\n' +
         (auto ? '夜间自动开通已生效，请核对是否到账。' : '点此一键开通：\n' + link)
       );
