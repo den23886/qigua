@@ -49,7 +49,11 @@ function newId() {
 }
 
 function store() {
-  return getStore({ name: 'qigua-orders', consistency: 'strong' });
+  const opts = { name: 'qigua-orders', consistency: 'strong' };
+  const siteID = process.env.BLOBS_SITE_ID;
+  const token = process.env.BLOBS_TOKEN;
+  if (siteID && token) { opts.siteID = siteID; opts.token = token; }
+  return getStore(opts);
 }
 
 async function pushFeishu(text) {
