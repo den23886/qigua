@@ -459,14 +459,10 @@
         <button class="btn ghost sm" id="closePay" style="width:auto;padding:8px 14px">关闭</button>
       </div>
       <p class="pay-desc" id="payDesc"></p>
-      <div class="pay-qrs" id="payQrs">
-        <div class="pay-qr-item">
+      <div class="pay-qrs" id="payQrs" style="justify-content:center">
+        <div class="pay-qr-item" style="flex:0 1 240px">
           <img src="pay-wechat.png" alt="微信收款码" onerror="this.parentNode.style.display='none'" />
           <div>微信支付</div>
-        </div>
-        <div class="pay-qr-item">
-          <img src="pay-alipay.png" alt="支付宝收款码" onerror="this.parentNode.style.display='none'" />
-          <div>支付宝</div>
         </div>
       </div>
       <p class="pay-desc" style="margin:0 0 10px;font-size:12px">扫码付 <strong id="payPriceInline" style="color:var(--gold-2)">9.9</strong> 元后，点下面按钮，确认后自动开通（一般 1 分钟内）。</p>
