@@ -459,8 +459,6 @@
         <button class="btn ghost sm" id="closePay" style="width:auto;padding:8px 14px">关闭</button>
       </div>
       <p class="pay-desc" id="payDesc"></p>
-      <button class="btn" id="buyBtn">去购买 · 自动发码</button>
-      <p class="pay-desc" style="margin:8px 0 0;font-size:12px">付款成功后页面会立即显示激活码，复制后回来粘贴即可。</p>
       <div class="pay-qrs" id="payQrs">
         <div class="pay-qr-item">
           <img src="pay-wechat.png" alt="微信收款码" onerror="this.parentNode.style.display='none'" />
@@ -471,7 +469,14 @@
           <div>支付宝</div>
         </div>
       </div>
-      <p class="pay-desc">付款页面会自动显示激活码；若遇到问题，可联系微信 <strong id="payWx" style="color:var(--gold-2)">（待配置）</strong>。</p>
+      <p class="pay-desc" style="margin:0 0 10px;font-size:12px">扫码付 <strong id="payPriceInline" style="color:var(--gold-2)">9.9</strong> 元后，点下面按钮，确认后自动开通（一般 1 分钟内）。</p>
+      <button class="btn gold" id="submitOrder">我已付款 · 通知开通</button>
+      <div id="orderWait" style="display:none;margin-top:12px;padding:12px;border:1px dashed rgba(217,178,106,.35);border-radius:12px;text-align:center">
+        <div class="pay-desc" id="orderIdText" style="margin:0 0 6px"></div>
+        <div class="pay-desc" id="orderStatusText" style="margin:0">已提交，等待确认…</div>
+        <button class="btn ghost sm" id="cancelOrder" style="width:auto;padding:6px 14px;margin-top:10px">取消等待</button>
+      </div>
+      <p class="pay-desc" style="margin:8px 0 0;font-size:12px">若长时间没开通，可联系微信 <strong id="payWx" style="color:var(--gold-2)">（待配置）</strong>。</p>
       <div class="pay-code">
         <label>已有激活码？</label>
         <input type="text" id="payCode" placeholder="QG-A-XXXXXX-XXXXXXXX" autocapitalize="characters" autocomplete="off" spellcheck="false" />
@@ -911,12 +916,7 @@ const PLUS_LIMIT = 8;        // 9.9 买断后每天次数
 const USAGE_KEY = 'qigua_usage_v1';
 const ENT_KEY = 'qigua_ent_v1';
 const CODE_SECRET = 'x8Fq2LmZ7VtR';
-const CONTACT_WX = '（待配置）';  // 收款后发码的微信号
-/* 发卡平台商品链接：付款后由平台自动发放激活码 */
-const SHOP_URL = {
-  A: '',   // 9.9 元 / 每天 8 次
-  C: ''    // 19.9 元 / 永久解锁追问
-};
+const CONTACT_WX = '（待配置）';  // 收款后答疑的微信号
 function usageToday(){
   try{
     const u = JSON.parse(localStorage.getItem(USAGE_KEY)) || {};
@@ -1090,38 +1090,124 @@ function showChatArea(){
   if (unlocked) $('#chatInput').focus();
 }
 
-/* ---------- 付费弹窗 ---------- */
+/* ---------- 付费弹窗：扫码付款 → 管理员同意后自动开通 ---------- */
 let payKind = 'A';
+let curOrder = null;
+let pollTimer = null;
+const PENDING_KEY = 'qigua_pending_order';
+
+function setOrderWait(on, idText, statusText){
+  $('#orderWait').style.display = on ? '' : 'none';
+  $('#submitOrder').style.display = on ? 'none' : '';
+  if (idText != null) $('#orderIdText').textContent = idText;
+  if (statusText != null) $('#orderStatusText').textContent = statusText;
+}
+function stopPoll(){ if (pollTimer){ clearInterval(pollTimer); pollTimer = null; } }
+function rememberOrder(o){
+  try{
+    if (o) localStorage.setItem(PENDING_KEY, JSON.stringify(o));
+    else localStorage.removeItem(PENDING_KEY);
+  }catch(e){}
+}
+function loadPendingOrder(){
+  try{ return JSON.parse(localStorage.getItem(PENDING_KEY)) || null; }catch(e){ return null; }
+}
+
 function openPay(kind){
   payKind = kind === 'C' ? 'C' : 'A';
   const isChat = payKind === 'C';
   $('#payTitle').textContent = isChat ? '解锁「继续追问」' : '今日次数已用完';
   $('#payPrice').textContent = isChat ? '19.9' : '9.9';
+  $('#payPriceInline').textContent = isChat ? '19.9' : '9.9';
   $('#payDesc').innerHTML = isChat
     ? '一次买断，永久解锁继续追问：解卦之后可以围绕这一卦随时追问小易。追问同样计入每日次数。'
     : `每天免费 ${FREE_LIMIT} 次已用完。一次买断，之后每天可用 ${PLUS_LIMIT} 次，永久有效。`;
   $('#payWx').textContent = CONTACT_WX;
   $('#payCode').value = '';
-  const url = SHOP_URL[payKind] || '';
-  $('#buyBtn').onclick = () => {
-    if (!url){ toast('购买链接还没配置，请稍后再试'); return; }
-    window.open(url, '_blank', 'noopener');
-  };
+  stopPoll();
+  curOrder = null;
+  setOrderWait(false, '', '已提交，等待确认…');
   $('#payMask').classList.add('on');
 }
-function closePay(){ $('#payMask').classList.remove('on'); }
-function applyRedeem(){
-  const r = redeem($('#payCode').value);
-  if (!r.ok){ toast(r.msg); return; }
-  closePay();
-  if (r.type === 'C'){
+function closePay(){ $('#payMask').classList.remove('on'); stopPoll(); }
+
+async function submitOrder(){
+  const btn = $('#submitOrder');
+  btn.disabled = true;
+  btn.textContent = '正在提交通知…';
+  try{
+    const res = await fetch('/api/order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create', type: payKind })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.id) throw new Error(data.msg || '提交失败');
+    curOrder = { id: data.id, type: payKind, ts: Date.now() };
+    rememberOrder(curOrder);
+    setOrderWait(true, '订单号 ' + data.id + ' · ¥' + data.amount, '已提交，等待确认…');
+    pollOrder();
+    pollTimer = setInterval(pollOrder, 4000);
+  }catch(e){
+    toast('提交失败：' + e.message);
+    setOrderWait(false);
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '我已付款 · 通知开通';
+  }
+}
+
+async function pollOrder(){
+  if (!curOrder) return;
+  try{
+    const res = await fetch('/api/order?id=' + encodeURIComponent(curOrder.id));
+    const data = await res.json().catch(() => ({}));
+    if (data.status === 'approved'){
+      const t = curOrder.type;
+      stopPoll();
+      rememberOrder(null);
+      curOrder = null;
+      applyUnlock(t);
+      return;
+    }
+    if (data.status === 'rejected'){
+      stopPoll();
+      rememberOrder(null);
+      curOrder = null;
+      setOrderWait(false);
+      toast('订单未通过，如有疑问请联系微信 ' + CONTACT_WX);
+      return;
+    }
+    if (data.status === 'none'){
+      stopPoll();
+      rememberOrder(null);
+      curOrder = null;
+      setOrderWait(false);
+      toast('订单号已失效，请重新提交');
+    }
+  }catch(e){ /* 网络抖动，下次轮询再试 */ }
+}
+
+function applyUnlock(type){
+  const e = getEnt();
+  if (type === 'C'){
+    if (!e.chat){ e.chat = true; setEnt(e); }
+    closePay();
     showChatArea();
     toast('解锁成功：可以继续追问了');
     return;
   }
+  if (!e.plus5){ e.plus5 = true; setEnt(e); }
+  closePay();
   $('#aiHint').textContent = `已提升至每天 ${PLUS_LIMIT} 次 · 今日剩余 ${remainToday()} 次`;
-  toast(r.msg);
+  toast('解锁成功：每天 ' + PLUS_LIMIT + ' 次');
   if (remainToday() > 0 && S.result) callAI(S.result);
+}
+
+function applyRedeem(){
+  const r = redeem($('#payCode').value);
+  if (!r.ok){ toast(r.msg); return; }
+  applyUnlock(r.type || 'A');
 }
 
 function appendChatMsg(role, text){
@@ -1485,6 +1571,13 @@ function init(){
   $('#closePay').onclick = closePay;
   $('#redeemBtn').onclick = applyRedeem;
   $('#unlockChat').onclick = () => openPay('C');
+  $('#submitOrder').onclick = submitOrder;
+  $('#cancelOrder').onclick = () => {
+    stopPoll();
+    curOrder = null;
+    setOrderWait(false, '', '已提交，等待确认…');
+    toast('已取消等待，如已付款可稍后重新提交');
+  };
   $('#pasteCode').onclick = async () => {
     try{
       const t = await navigator.clipboard.readText();
@@ -1539,6 +1632,18 @@ function init(){
     $('#settings').classList.add('hidden');
     toast(c.key ? '已保存，将使用大模型解读' : '已保存（未填 Key，使用本地卦辞）');
   };
+
+  /* 之前付款但还没确认的订单：继续轮询，确认后自动解锁 */
+  const pendingOrder = loadPendingOrder();
+  const entNow = getEnt();
+  const alreadyDone = pendingOrder && ((pendingOrder.type === 'C' && entNow.chat) || (pendingOrder.type === 'A' && entNow.plus5));
+  if (pendingOrder && pendingOrder.id && !alreadyDone && Date.now() - (pendingOrder.ts || 0) < 86400000){
+    curOrder = pendingOrder;
+    stopPoll();
+    pollTimer = setInterval(pollOrder, 8000);
+  }else if (pendingOrder){
+    rememberOrder(null);
+  }
 
   updateTimePreview();
   setInterval(updateTimePreview, 1000);

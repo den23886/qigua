@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>起个卦 · 管理台</title>
+<style>
+  :root{
+    --bg:#0b0d12; --panel:#14171f; --line:rgba(217,178,106,.22);
+    --gold:#d9b26a; --gold-2:#f0d9a8; --txt:#e8e4dc; --dim:#8b8878;
+    --ok:#5fbf8a; --warn:#e0a24a; --bad:#d9665f;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.7 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  .wrap{max-width:520px;margin:0 auto;padding:22px 14px 60px}
+  h1{font-size:18px;font-weight:600;color:var(--gold-2);margin:0 0 4px;letter-spacing:.08em}
+  .sub{font-size:12px;color:var(--dim);margin-bottom:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+  input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0e1117;color:var(--txt);font-size:15px;outline:none}
+  input:focus{border-color:var(--gold)}
+  button{
+    border:none;border-radius:10px;padding:11px 16px;font-size:14px;font-weight:600;cursor:pointer;
+    background:linear-gradient(135deg,#d9b26a,#b8913f);color:#1a1207;
+  }
+  button:disabled{opacity:.45;cursor:default}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--dim)}
+  button.bad{background:transparent;border:1px solid rgba(217,102,95,.55);color:var(--bad)}
+  .row{display:flex;gap:8px;margin-top:10px}
+  .row button{flex:1}
+  .order{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+  .order.pending{border-color:rgba(224,162,74,.55);background:rgba(224,162,74,.06)}
+  .order.approved{border-color:rgba(95,191,138,.4)}
+  .order.rejected{opacity:.55}
+  .o-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .o-price{color:var(--gold-2);font-size:20px;font-weight:700}
+  .o-tag{font-size:12px;padding:2px 8px;border-radius:20px;border:1px solid currentColor}
+  .tag-pending{color:var(--warn)}
+  .tag-approved{color:var(--ok)}
+  .tag-rejected{color:var(--bad)}
+  .o-meta{font-size:12px;color:var(--dim);margin-top:4px;word-break:break-all}
+  .empty{text-align:center;color:var(--dim);font-size:13px;padding:26px 0}
+  .hint{font-size:12px;color:var(--dim);margin-top:10px;line-height:1.8}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .topbar .mini{font-size:12px;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div>
+      <h1>起个卦 · 管理台</h1>
+      <div class="sub">确认收款后点「同意」，用户端会自动开通</div>
+    </div>
+    <button class="ghost" id="logout" style="display:none;width:auto;padding:8px 12px">退出</button>
+  </div>
+
+  <div class="card" id="gate">
+    <input type="password" id="pass" placeholder="输入管理密码" autocomplete="current-password" />
+    <div class="row"><button id="login">登录</button></div>
+    <div class="hint">密码在 Netlify 环境变量 <b>ADMIN_PASS</b> 中设置；登录状态只保存在本机。</div>
+  </div>
+
+  <div id="panel" style="display:none">
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div style="font-size:13px">待确认：<b id="pendCount" style="color:var(--warn)">0</b> 单</div>
+      <div style="display:flex;gap:8px">
+        <button class="ghost" id="soundBtn" style="width:auto;padding:8px 12px">开启提醒</button>
+        <button class="ghost" id="refreshBtn" style="width:auto;padding:8px 12px">刷新</button>
+      </div>
+    </div>
+    <div id="list"></div>
+    <div class="hint">
+      每 5 秒自动刷新。<br>
+      开通后用户端最多 5 秒内自动解锁，无需发激活码。
+    </div>
+  </div>
+</div>
+
+<script>
+const KEY = 'qigua_admin_pass';
+const $ = s => document.querySelector(s);
+let pass = localStorage.getItem(KEY) || '';
+let timer = null;
+let lastPending = -1;
+let audioCtx = null;
+
+function toast(msg){
+  const d = document.createElement('div');
+  d.textContent = msg;
+  d.style.cssText = 'position:fixed;left:50%;bottom:40px;transform:translateX(-50%);background:rgba(20,23,31,.96);border:1px solid rgba(217,178,106,.35);color:#f0d9a8;padding:10px 18px;border-radius:20px;font-size:13px;z-index:99';
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 2200);
+}
+
+async function api(payload){
+  const res = await fetch('/api/order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(Object.assign({ pass }, payload))
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.msg || '请求失败');
+  return data;
+}
+
+function beep(){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const t = audioCtx.currentTime;
+    [0, 0.18].forEach(off => {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = 'sine';
+      o.frequency.value = 880;
+      g.gain.setValueAtTime(0.001, t + off);
+      g.gain.exponentialRampToValueAtTime(0.25, t + off + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, t + off + 0.16);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(t + off); o.stop(t + off + 0.18);
+    });
+  }catch(e){}
+}
+
+function timeText(ts){
+  const d = new Date(ts || 0);
+  const p = n => String(n).padStart(2, '0');
+  return `${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+function render(orders){
+  const pend = orders.filter(o => o.status === 'pending');
+  $('#pendCount').textContent = pend.length;
+  if (lastPending >= 0 && pend.length > lastPending) beep();
+  lastPending = pend.length;
+
+  if (!orders.length){
+    $('#list').innerHTML = '<div class="empty">暂无订单</div>';
+    return;
+  }
+  $('#list').innerHTML = orders.map(o => {
+    const tag = { pending: '待确认', approved: '已开通', rejected: '已拒绝' }[o.status] || o.status;
+    const btns = o.status === 'pending'
+      ? `<div class="row">
+           <button data-act="approve" data-id="${o.id}">同意开通</button>
+           <button class="bad" data-act="reject" data-id="${o.id}">拒绝</button>
+         </div>` : '';
+    return `<div class="order ${o.status}">
+      <div class="o-top">
+        <div class="o-price">¥${o.amount}</div>
+        <div class="o-tag tag-${o.status}">${tag}</div>
+      </div>
+      <div class="o-meta">${o.label || ''} · 订单号 ${o.id}</div>
+      <div class="o-meta">下单时间 ${timeText(o.createdAt)}</div>
+      ${btns}
+    </div>`;
+  }).join('');
+}
+
+async function load(){
+  try{
+    const data = await api({ action: 'list' });
+    render(data.orders || []);
+  }catch(e){
+    if (/密码/.test(e.message)){
+      stop();
+      localStorage.removeItem(KEY);
+      $('#panel').style.display = 'none';
+      $('#gate').style.display = '';
+      $('#logout').style.display = 'none';
+      toast('密码错误或已变更，请重新登录');
+    }else{
+      toast(e.message);
+    }
+  }
+}
+
+function start(){
+  $('#gate').style.display = 'none';
+  $('#panel').style.display = '';
+  $('#logout').style.display = '';
+  load();
+  stop();
+  timer = setInterval(load, 5000);
+}
+function stop(){ if (timer){ clearInterval(timer); timer = null; } }
+
+$('#login').onclick = async () => {
+  pass = $('#pass').value.trim();
+  if (!pass){ toast('请输入密码'); return; }
+  try{
+    await api({ action: 'list' });
+    localStorage.setItem(KEY, pass);
+    start();
+  }catch(e){ toast(e.message); }
+};
+$('#pass').addEventListener('keydown', e => { if (e.key === 'Enter') $('#login').click(); });
+$('#logout').onclick = () => {
+  stop();
+  localStorage.removeItem(KEY);
+  pass = '';
+  $('#panel').style.display = 'none';
+  $('#gate').style.display = '';
+  $('#logout').style.display = 'none';
+};
+$('#refreshBtn').onclick = load;
+$('#soundBtn').onclick = () => {
+  beep();
+  if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+  toast('提醒已开启，保持本页打开即可听到提示音');
+};
+$('#list').addEventListener('click', async e => {
+  const btn = e.target.closest('button[data-act]');
+  if (!btn) return;
+  btn.disabled = true;
+  try{
+    await api({ action: btn.dataset.act, id: btn.dataset.id });
+    toast(btn.dataset.act === 'approve' ? '已开通，用户端会自动解锁' : '已拒绝');
+    load();
+  }catch(err){
+    toast(err.message);
+    btn.disabled = false;
+  }
+});
+
+if (pass) start();
+</script>
+</body>
+</html>
