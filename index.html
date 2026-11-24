@@ -271,6 +271,85 @@
   .live-line.done b{background:#cfc7b4;box-shadow:none}
   .live-line.done.dong b{background:var(--gold);box-shadow:0 0 8px rgba(217,178,106,.5)}
   .foot{text-align:center;font-size:11px;color:#4b5261;margin-top:26px;line-height:1.9;letter-spacing:.06em}
+  /* ---------- 模式切换 ---------- */
+  .modes{display:flex;gap:8px;justify-content:center;margin:16px 0 2px}
+  .mode{
+    padding:8px 20px;border-radius:999px;font-size:13px;letter-spacing:.12em;cursor:pointer;
+    border:1px solid #2b3341;background:rgba(255,255,255,.02);color:var(--dim);transition:.22s;
+  }
+  .mode.on{
+    border-color:rgba(217,178,106,.55);color:var(--gold-2);
+    background:linear-gradient(160deg,rgba(217,178,106,.16),rgba(217,178,106,.03));
+    box-shadow:0 0 20px -10px rgba(217,178,106,.9);
+  }
+  /* ---------- 塔罗 ---------- */
+  .tarot-table{display:flex;gap:12px;justify-content:center;align-items:center;min-height:176px;margin:6px 0 2px}
+  .tcard{
+    width:88px;height:144px;border-radius:10px;position:relative;flex:0 0 auto;
+    border:1px solid rgba(217,178,106,.45);
+    background:linear-gradient(165deg,#1b2231,#10141c 70%);
+    box-shadow:0 8px 24px -14px rgba(0,0,0,.9),inset 0 0 18px rgba(217,178,106,.06);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+    animation:fadeUp .45s ease both;
+  }
+  .tcard.back{
+    background:repeating-linear-gradient(45deg,#151b26,#151b26 6px,#1c2433 6px,#1c2433 12px);
+    border-color:rgba(217,178,106,.26);
+  }
+  .tcard.back .tnum,.tcard.back .tname,.tcard.back .tpos{visibility:hidden}
+  .tcard .tnum{font-family:"Songti SC","STSong",serif;font-size:19px;color:var(--gold);letter-spacing:.08em}
+  .tcard .tname{font-size:13px;color:var(--gold-2);letter-spacing:.06em}
+  .tcard .tpos{
+    position:absolute;top:7px;right:7px;font-size:9px;letter-spacing:.04em;
+    padding:1px 6px;border-radius:6px;border:1px solid rgba(111,174,139,.4);color:#9fd4b5;
+    background:rgba(111,174,139,.08);
+  }
+  .tcard .tpos.rev{border-color:rgba(201,96,90,.45);color:#e0928c;background:rgba(201,96,90,.08)}
+  .tr-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px dashed var(--line)}
+  .tr-item:last-child{border-bottom:none}
+  .tr-card{
+    width:58px;height:92px;border-radius:8px;flex:0 0 auto;
+    border:1px solid rgba(217,178,106,.45);
+    background:linear-gradient(165deg,#1b2231,#10141c 70%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  }
+  .tr-card .tnum{font-family:"Songti SC","STSong",serif;font-size:14px;color:var(--gold)}
+  .tr-card .tname{font-size:10px;color:var(--gold-2);letter-spacing:.04em}
+  .tr-body{min-width:0;flex:1}
+  .tr-pos{font-size:11px;letter-spacing:.1em;color:var(--dim);margin-bottom:2px}
+  .tr-name{font-size:15px;color:var(--gold-2);letter-spacing:.04em}
+  .tr-name em{font-style:normal;font-size:11px;color:#8a8f99;margin-left:6px}
+  .tr-name .rev{color:#e0928c}
+  .tr-kw{font-size:12px;color:#a9b0bd;margin-top:4px}
+  .tr-mean{font-size:12.5px;color:var(--dim);line-height:1.75;margin-top:6px}
+  /* ---------- 奇门 ---------- */
+  .modes{flex-wrap:wrap}
+  .mode{padding:8px 16px}
+  .qm-time{margin:10px 0 14px;font-size:13px;color:var(--gold-2);letter-spacing:.04em}
+  .qm-lbl{font-size:12px;color:var(--dim);margin-right:10px;flex:0 0 auto}
+  #qmTime{
+    background:#12161e;border:1px solid var(--line);color:#d8dce4;border-radius:8px;
+    padding:8px 10px;font-size:13px;font-family:inherit;flex:1;min-width:0;
+  }
+  #qmLon{
+    width:86px;background:#12161e;border:1px solid var(--line);color:#d8dce4;
+    border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;
+  }
+  #qmTst{vertical-align:-2px;margin-right:4px;accent-color:#c9a66b}
+  .qm-meta{font-size:12.5px;color:var(--dim);line-height:2;margin-bottom:12px}
+  .qm-meta b{color:var(--gold-2);font-weight:500}
+  .qm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .qm-cell{
+    border:1px solid var(--line);border-radius:8px;padding:9px 7px;min-height:96px;
+    background:rgba(255,255,255,.015);display:flex;flex-direction:column;gap:3px;font-size:12px;
+  }
+  .qm-cell .pname{font-size:10px;color:#5c6472;letter-spacing:.1em}
+  .qm-cell .god{color:#c9a66b}
+  .qm-cell .star{color:#9fb8d4}
+  .qm-cell .door{color:#9fd4b5}
+  .qm-cell .tg{color:#e0c98a;letter-spacing:.06em}
+  .qm-cell .dg{color:#7f8a9a;letter-spacing:.06em}
+  .qm-cell.center{background:rgba(217,178,106,.05);border-color:rgba(217,178,106,.3);justify-content:center}
 </style>
 </head>
 <body>
@@ -279,6 +358,12 @@
     <div class="gear" id="gearBtn" title="设置" style="display:none">⚙</div>
     <div class="brand" id="brandTitle">起个卦</div>
     <div class="slogan">心诚则灵 · 一事一卦</div>
+  </div>
+
+  <div class="modes" id="modes">
+    <button class="mode on" data-mode="yijing">易经起卦</button>
+    <button class="mode" data-mode="tarot">塔罗占卜</button>
+    <button class="mode" data-mode="qimen">奇门遁甲</button>
   </div>
 
   <div class="steps">
@@ -413,8 +498,119 @@
     </div>
   </section>
 
+  <!-- ============ 塔罗 · 第一步：问事 ============ -->
+  <section id="tstep1" class="hidden">
+    <div class="card">
+      <h2>你想问塔罗什么？</h2>
+      <p class="hint">静下心，把问题在心里说一遍。塔罗看的是当下的能量走向，它给你视角，不替你决定。</p>
+      <textarea id="tquestion" maxlength="200" placeholder="例如：我和他这段关系接下来会怎么走？"></textarea>
+      <div class="chips" id="tChips"></div>
+      <div class="row"><button class="btn" id="toTStep2">下一步 · 洗牌抽牌</button></div>
+    </div>
+  </section>
+
+  <!-- ============ 塔罗 · 第二步：抽牌 ============ -->
+  <section id="tstep2" class="hidden">
+    <div class="card">
+      <h2>选择牌阵</h2>
+      <p class="hint">牌阵决定看事情的角度。第一次玩，建议用「三张牌」。</p>
+      <div class="methods" id="tSpreads">
+        <div class="method on" data-s="three">
+          <span class="ic">❖</span><div class="nm">三张牌</div>
+          <div class="ds">过去 · 现在 · 未来</div>
+        </div>
+        <div class="method" data-s="one">
+          <span class="ic">◈</span><div class="nm">单张指引</div>
+          <div class="ds">此刻最需要看到的一张</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>洗牌抽牌</h2>
+      <p class="hint" id="tDrawHint">心中默念问题，点击下方按钮，牌会为你而落。</p>
+      <div class="tarot-table" id="tarotTable"></div>
+    </div>
+
+    <div class="row">
+      <button class="btn ghost sm" id="backT1">返回问题</button>
+      <button class="btn" id="doDraw">洗 牌 抽 牌</button>
+    </div>
+  </section>
+
+  <!-- ============ 塔罗 · 第三步：解牌 ============ -->
+  <section id="tstep3" class="hidden">
+    <div class="card">
+      <h2>你抽到的牌</h2>
+      <div id="tCards"></div>
+    </div>
+
+    <div class="card">
+      <h2>小易解牌</h2>
+      <p class="hint" id="tAiHint">正在为你解读…</p>
+      <div id="tAiBox" class="ai-box"></div>
+      <div class="row">
+        <button class="btn ghost sm" id="tAgain">重新解读</button>
+        <button class="btn ghost sm" id="tNew">再抽一次</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 奇门 · 第一步：问事 ============ -->
+  <section id="qstep1" class="hidden">
+    <div class="card">
+      <h2>你想问奇门什么？</h2>
+      <p class="hint">奇门讲究「一事一局」。写下你最想弄清的那件事，再进入起局。</p>
+      <textarea id="qquestion" maxlength="200" placeholder="例如：这个项目这个月能不能签下来？"></textarea>
+      <div class="chips" id="qChips"></div>
+      <div class="row"><button class="btn" id="toQStep2">下一步 · 起局</button></div>
+    </div>
+  </section>
+
+  <!-- ============ 奇门 · 第二步：起局 ============ -->
+  <section id="qstep2" class="hidden">
+    <div class="card">
+      <h2>选择起局时间</h2>
+      <p class="hint">奇门以起局那一刻定盘。默认用此刻，也可以指定时间做复盘。</p>
+      <div class="qm-time" id="qmNow"></div>
+      <div class="row" style="justify-content:flex-start">
+        <label class="qm-lbl" for="qmTime">自定义时间</label>
+        <input type="datetime-local" id="qmTime" />
+      </div>
+      <div class="row" style="justify-content:flex-start;margin-top:12px">
+        <label class="qm-lbl"><input type="checkbox" id="qmTst" /> 真太阳时</label>
+        <input type="number" id="qmLon" value="120" step="0.1" min="73" max="135" />
+        <span class="hint" style="margin:0">东经度数，如北京 116.4 / 成都 104.1</span>
+      </div>
+      <p class="hint" id="qmErr" style="color:#c9605a"></p>
+    </div>
+    <div class="row">
+      <button class="btn ghost sm" id="backQ1">返回问题</button>
+      <button class="btn" id="doQiMen">起 局</button>
+    </div>
+  </section>
+
+  <!-- ============ 奇门 · 第三步：解局 ============ -->
+  <section id="qstep3" class="hidden">
+    <div class="card">
+      <h2>奇门局</h2>
+      <div class="qm-meta" id="qmMeta"></div>
+      <div class="qm-grid" id="qmGrid"></div>
+      <p class="hint" style="margin-top:10px">每宫自上而下：八神 · 九星 · 八门 · 天盘干 · 地盘干</p>
+    </div>
+    <div class="card">
+      <h2>小易解局</h2>
+      <p class="hint" id="qmAiHint">正在为你解局…</p>
+      <div id="qmAiBox" class="ai-box"></div>
+      <div class="row">
+        <button class="btn ghost sm" id="qmAgain">重新解读</button>
+        <button class="btn ghost sm" id="qmNew">重新起局</button>
+      </div>
+    </div>
+  </section>
+
   <div class="foot">
-    卦象仅供参考 · 谋事在人<br />本程序不构成任何投资、医疗、法律建议
+    卦象与牌面仅供参考 · 谋事在人<br />本程序不构成任何投资、医疗、法律建议
   </div>
 </div>
 
@@ -928,7 +1124,7 @@ const DEFAULT_CFG = {
 };
 /* ================= 免费额度与付费解锁 ================= */
 /* 说明：额度与权益存在浏览器本地，仅作产品限制，非安全边界 */
-const FREE_LIMIT = 3;        // 每天免费次数
+const FREE_LIMIT = 999;      // 每天免费次数（付费已关闭，等同不限次数）
 const PLUS_LIMIT = 8;        // 9.9 买断后每天次数
 const USAGE_KEY = 'qigua_usage_v1';
 const ENT_KEY = 'qigua_ent_v1';
@@ -948,8 +1144,13 @@ function bumpUsage(){
   return n;
 }
 /* 已购权益：plus5=每天8次，chat=永久解锁追问 */
+/* 付费已关闭：追问默认永久解锁，不再需要购买 */
 function getEnt(){
-  try{ return JSON.parse(localStorage.getItem(ENT_KEY)) || {}; }catch(e){ return {}; }
+  try{
+    const o = JSON.parse(localStorage.getItem(ENT_KEY)) || {};
+    o.chat = true;
+    return o;
+  }catch(e){ return { chat: true }; }
 }
 function setEnt(o){ localStorage.setItem(ENT_KEY, JSON.stringify(o)); }
 function dailyLimit(){ return getEnt().plus5 ? PLUS_LIMIT : FREE_LIMIT; }
@@ -1566,6 +1767,630 @@ async function doCast(){
   }
 }
 
+/* ================= 塔罗占卜 ================= */
+const ROMAN = ['0','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX','XXI'];
+const TAROT = [
+  { n:'愚人', e:'The Fool', u:'新的开始 · 自由 · 冒险', r:'鲁莽 · 逃避 · 缺乏规划',
+    um:'一张全新的白纸。此刻适合迈出第一步，别让“还没准备好”把你困住。未知本身就是旅程的一部分，轻装上路反而走得更远。',
+    rm:'想走又不敢走，或者走得太随性。提醒你先看清脚下的路，别用“随缘”来掩盖逃避。' },
+  { n:'魔术师', e:'The Magician', u:'创造 · 行动 · 资源在手', r:'空谈 · 欺瞒 · 能力没用出来',
+    um:'你手里已经握着做成这件事需要的工具和人。缺的不是条件，是开口、是动手。现在就开始整合资源。',
+    rm:'想法很多、落地很少；也可能有人对你说的话比做的事多。先核实信息，再谈投入。' },
+  { n:'女祭司', e:'The High Priestess', u:'直觉 · 内省 · 隐藏的信息', r:'忽视直觉 · 隐瞒 · 判断失准',
+    um:'答案你其实已经知道了，只是一直在向外求证。此刻宜静不宜动，多观察，少表态。',
+    rm:'有人在隐藏关键信息，或者你自己在回避那个不愿承认的答案。先别急着下结论。' },
+  { n:'皇后', e:'The Empress', u:'滋养 · 丰盛 · 孕育成果', r:'依赖 · 过度付出 · 停滞',
+    um:'这件事有生长的土壤，慢慢养就会结果。适合投入时间、感情和耐心，而不是急于收割。',
+    rm:'付出和回报失衡，可能是你给得太多，也可能是事情卡在一个需要换个方式照料的地方。' },
+  { n:'皇帝', e:'The Emperor', u:'秩序 · 掌控 · 承担责任', r:'控制过头 · 僵化 · 失信',
+    um:'需要一个明确的规则和负责人。把边界、时间、责任讲清楚，事情才推得动。',
+    rm:'抓得太紧反而失控。有人只想要权力不担责任，或者你正被死板的规则困住。' },
+  { n:'教皇', e:'The Hierophant', u:'传统 · 指引 · 系统学习', r:'教条 · 叛逆 · 脱离体系',
+    um:'这件事有现成的路子和前辈的经验可以借。找个靠谱的老师或按规矩来，比自己硬闯省力。',
+    rm:'旧办法已经不适合了，或者你在盲目服从一套并不认同的规则。该质疑的时候要质疑。' },
+  { n:'恋人', e:'The Lovers', u:'结合 · 选择 · 真心相吸', r:'犹豫 · 价值观冲突 · 分离',
+    um:'关键在一个“选”字，而且要是发自内心的选择。关系或合作里有真实的吸引力，值得认真对待。',
+    rm:'表面在一起，内里各想各的。别为了不孤单而将就，也别在两个选项之间无限拖延。' },
+  { n:'战车', e:'The Chariot', u:'前进 · 意志 · 势在必得', r:'方向不明 · 内耗 · 失控',
+    um:'只要方向定死、不再摇摆，你有能力把这件事硬推过去。集中火力，别分心。',
+    rm:'力气使了，方向却是散的。停下来先确认目标，否则越努力越偏。' },
+  { n:'力量', e:'Strength', u:'勇气 · 耐心 · 以柔克刚', r:'自我怀疑 · 情绪失控',
+    um:'这件事不需要硬碰硬，需要的是沉住气的温柔和坚持。你比你以为的更有力量。',
+    rm:'真正的阻力来自你对自己的怀疑，或者被情绪带着走。先安顿好自己，再处理事情。' },
+  { n:'隐者', e:'The Hermit', u:'独处 · 反思 · 寻找答案', r:'孤立 · 固执 · 逃避人群',
+    um:'阶段性的答案不在热闹里，在你一个人的安静里。给自己一段时间想清楚，不必急着回应外界。',
+    rm:'独处变成了躲避，反思变成了钻牛角尖。适当走出来，别把自己关死。' },
+  { n:'命运之轮', e:'Wheel of Fortune', u:'转机 · 循环 · 顺势而为', r:'停滞 · 重复旧路 · 逆势',
+    um:'局面正在转，而且多半往好的方向。别死守旧做法，抓住接下来出现的那次机会。',
+    rm:'同样的坑反复踩，说明模式没换。这次不主动改，轮子还会把你带回原位。' },
+  { n:'正义', e:'Justice', u:'平衡 · 公正 · 因果分明', r:'失衡 · 偏颇 · 逃避责任',
+    um:'讲道理、按规矩，这件事就会有公道的结果。你付出什么，就会收回什么。',
+    rm:'有一方在占便宜，或者你在回避自己该负的那部分责任。看清事实，别自我说服。' },
+  { n:'倒吊人', e:'The Hanged Man', u:'暂停 · 换位思考 · 主动的等待', r:'徒劳的拖延 · 固执 · 沉没成本',
+    um:'现在不是动的时候。换个角度看，你会发现卡住的其实是自己的执念，不是外界。',
+    rm:'等待已经变成消耗。该放手的舍不得放，投入越多越难抽身。' },
+  { n:'死神', e:'Death', u:'结束 · 蜕变 · 断舍离', r:'抗拒改变 · 藕断丝连',
+    um:'一个阶段确实要结束了。别怕，结束是为了给新的东西腾位置，放下比硬撑更有出路。',
+    rm:'明明已经走不下去，却还在拖。拖着只会把痛苦拉长。' },
+  { n:'节制', e:'Temperance', u:'调和 · 耐心 · 恰到好处', r:'失衡 · 急躁 · 用力过猛',
+    um:'这件事的关键是“度”。不急不慢、不多不少，把节奏调顺，结果自然来。',
+    rm:'要么太急，要么太散。先停下来校准自己的节奏，再谈推进。' },
+  { n:'恶魔', e:'The Devil', u:'欲望 · 束缚 · 执念', r:'觉察 · 解脱 · 摆脱控制',
+    um:'让你纠结的不是事情本身，而是舍不得、放不下。看清是什么在绑住你，就已经松了一半。',
+    rm:'你开始看清那个束缚了，也正在往外走。这是个好信号，别回头。' },
+  { n:'高塔', e:'The Tower', u:'突变 · 崩塌 · 真相浮现', r:'勉强维持 · 延迟的危机',
+    um:'旧的框架撑不住了，会有一场突如其来的变化。别急着修补，先护住最重要的东西。',
+    rm:'危机被暂时压住了，但根子还在。拖着不处理，它会在更糟的时候爆开。' },
+  { n:'星星', e:'The Star', u:'希望 · 疗愈 · 方向感', r:'失望 · 信心不足',
+    um:'最难的已经过去，接下来是慢慢恢复。保持你原本相信的东西，会有回应。',
+    rm:'不是没希望，是你暂时看不见。别把一时的低落当成最终结论。' },
+  { n:'月亮', e:'The Moon', u:'迷雾 · 潜意识 · 不安', r:'迷雾散去 · 真相浮现',
+    um:'现在看到的不一定是全貌，情绪会放大恐惧。先别做重大决定，等雾散。',
+    rm:'看不清的东西正在浮出水面。你担心的那部分，很快就会有个明确说法。' },
+  { n:'太阳', e:'The Sun', u:'光明 · 成功 · 活力', r:'短暂的阴霾 · 过度乐观',
+    um:'这是塔罗里最亮的一张牌。事情会往好的方向走，大胆一些，你值得这份顺利。',
+    rm:'结果依然向好，但别因为一时顺利就大意。小阴影遮不住太阳。' },
+  { n:'审判', e:'Judgement', u:'觉醒 · 召唤 · 重新出发', r:'自我批判 · 逃避召唤',
+    um:'你心里其实一直有个声音在叫你去做某件事。现在正是回应它的时候，也是了结旧账的时候。',
+    rm:'你在用“我不够好”拖延那个真正想做的决定。别对自己太苛刻。' },
+  { n:'世界', e:'The World', u:'圆满 · 完成 · 整合', r:'差最后一步 · 未竟 · 停滞',
+    um:'一个周期走到了终点，收获和认可都会到来。可以准备庆祝，也可以准备下一个开始。',
+    rm:'已经走到 99%，却卡在最后一步。差的那一点，往往是你最不愿意面对的地方。' }
+];
+const TAROT_POS = { one:['此刻'], three:['过去','现在','未来'] };
+const T_CHIPS = ['这段关系会怎么发展','这份工作还值得坚持吗','我该不该做这个决定','最近为什么总觉得不顺','这次机会我能抓住吗','我内心真正想要的是什么'];
+const tarotState = { q:'', spread:'three', cards:null, busy:false };
+let tarotAborter = null;
+
+function tarotPick(count){
+  const pool = TAROT.map((_, i) => i);
+  const out = [];
+  for (let k = 0; k < count && pool.length; k++){
+    const j = Math.floor(Math.random() * pool.length);
+    out.push({ idx: pool.splice(j, 1)[0], rev: Math.random() < 0.38 });
+  }
+  return out;
+}
+
+function tarotBacks(count){
+  $('#tarotTable').innerHTML = Array.from({ length: count }, (_, i) =>
+    `<div class="tcard back" style="animation-delay:${i * 0.1}s"></div>`).join('');
+}
+
+function tarotShowFaces(cards){
+  $('#tarotTable').innerHTML = cards.map((c, i) => {
+    const card = TAROT[c.idx];
+    return `<div class="tcard" style="animation-delay:${i * 0.1}s">
+      <div class="tnum">${ROMAN[c.idx]}</div>
+      <div class="tname">${card.n}</div>
+      <div class="tpos${c.rev ? ' rev' : ''}">${c.rev ? '逆位' : '正位'}</div>
+    </div>`;
+  }).join('');
+}
+
+function tarotRenderResult(){
+  const { cards, spread } = tarotState;
+  const posNames = TAROT_POS[spread];
+  $('#tCards').innerHTML = cards.map((c, i) => {
+    const card = TAROT[c.idx];
+    return `<div class="tr-item">
+      <div class="tr-card"><div class="tnum">${ROMAN[c.idx]}</div><div class="tname">${card.n}</div></div>
+      <div class="tr-body">
+        <div class="tr-pos">${posNames[i]}　${c.rev ? '逆位' : '正位'}</div>
+        <div class="tr-name">${card.n}<em>${card.e}</em></div>
+        <div class="tr-kw">${c.rev ? card.r : card.u}</div>
+        <div class="tr-mean">${c.rev ? card.rm : card.um}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function buildTarotPrompt(){
+  const { q, spread, cards } = tarotState;
+  const posNames = TAROT_POS[spread];
+  const detail = cards.map((c, i) => {
+    const card = TAROT[c.idx];
+    return `【${posNames[i]}】${card.n}（${card.e}）· ${c.rev ? '逆位' : '正位'}\n` +
+      `关键词：${c.rev ? card.r : card.u}\n` +
+      `牌义：${c.rev ? card.rm : card.um}`;
+  }).join('\n\n');
+  const layout = spread === 'one'
+    ? '单张指引（一张牌，看此刻最需要看到的信息）'
+    : '三张牌阵（过去 · 现在 · 未来，依次对应）';
+  return `你是一位温和、通透、不说空话的塔罗解读师，擅长把牌面翻译成普通人能听懂的生活建议。
+
+【问卜人的问题】
+${q || '（没有明确写问题，请围绕他当下的处境给出指引）'}
+
+【牌阵】${layout}
+
+【抽到的牌】
+${detail}
+
+【解读要求】
+1. 开头两三句话直接给整体判断：这件事当下的能量是顺是滞，倾向如何，别模棱两可。
+2. 逐张讲牌：这张牌在这个位置上到底在说什么，用生活场景打比方，不要只念关键词。
+3. 把几张牌串成一个连贯的故事：它们之间怎么互相呼应、矛盾在哪。
+4. 给出 3 条能落地的建议：该做什么、别做什么、什么时候动。
+5. 最后一句提醒：这段解读里最容易被忽略、但最该记住的一点。
+
+写法要求：像朋友聊天，禁止文言腔，禁止堆砌玄学术语，禁止说“作为AI”。全文 600-900 字，用短小标题分段，结论放最前面。`;
+}
+
+function tarotLocalNote(){
+  const p = document.createElement('p');
+  p.style.cssText = 'color:#8a8f99;font-size:12.5px;margin-top:12px';
+  p.textContent = '本地牌义模式：未配置大模型接口，以上为牌面基础含义。点右上角 ⚙ 填入 API Key，可得到结合你问题的详细解读。';
+  $('#tAiBox').appendChild(p);
+}
+
+async function callTarotAI(){
+  const cfg = getCfg();
+  const box = $('#tAiBox');
+  if (tarotAborter) tarotAborter.abort();
+  if (!cfg.base){
+    box.innerHTML = '';
+    $('#tAiHint').textContent = '本地牌义模式';
+    tarotLocalNote();
+    return;
+  }
+  box.innerHTML = '<div class="thinking">正在解读 <span>·</span><span>·</span><span>·</span></div>';
+  $('#tAiHint').textContent = `${cfg.model || '模型'} · 解读中`;
+  tarotAborter = new AbortController();
+  const timer = setTimeout(() => tarotAborter.abort(), 120000);
+  const proxy = /^\/api/.test(cfg.base) || !cfg.key;
+  let acc = '';
+  try{
+    const url = proxy
+      ? cfg.base.replace(/\/+$/, '') + '/chat'
+      : cfg.base.replace(/\/+$/, '') + '/chat/completions';
+    const headers = { 'Content-Type':'application/json' };
+    if (!proxy) headers['Authorization'] = 'Bearer ' + cfg.key;
+    const res = await fetch(url, {
+      method:'POST',
+      signal: tarotAborter.signal,
+      headers,
+      body: JSON.stringify({
+        model: cfg.model || 'deepseek-chat',
+        stream: true,
+        temperature: 0.9,
+        messages: [
+          { role:'system', content:'你是一位温和通透的塔罗解读师，擅长把牌面翻译成生活建议，语气像朋友。' },
+          { role:'user', content: buildTarotPrompt() }
+        ]
+      })
+    });
+    if (!res.ok){
+      const errText = await res.text().catch(() => '');
+      throw new Error('HTTP ' + res.status + ' ' + errText.slice(0, 160));
+    }
+    const ctype = res.headers.get('content-type') || '';
+    if (ctype.indexOf('event-stream') === -1){
+      const j = await res.json().catch(() => null);
+      const text = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+      if (!text) throw new Error((j && j.error && (j.error.message || j.error)) || '接口无返回内容');
+      acc = text;
+      box.innerHTML = renderMD(acc);
+    } else {
+      const reader = res.body.getReader();
+      const dec = new TextDecoder('utf-8');
+      let buf = '';
+      while (true){
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream:true });
+        const parts = buf.split('\n');
+        buf = parts.pop();
+        for (const line of parts){
+          const s = line.trim();
+          if (!s.startsWith('data:')) continue;
+          const data = s.slice(5).trim();
+          if (data === '[DONE]') continue;
+          try{
+            const j = JSON.parse(data);
+            const delta = j.choices && j.choices[0] && j.choices[0].delta;
+            if (delta && delta.content){
+              acc += delta.content;
+              box.innerHTML = renderMD(acc) + '<span class="cursor"></span>';
+              box.scrollIntoView({ block:'nearest' });
+            }
+          }catch(e){ /* 忽略半包 */ }
+        }
+      }
+      if (!acc.trim()){
+        box.innerHTML = '<p>接口没有返回内容，请检查模型名或额度。</p>';
+        tarotLocalNote();
+        return;
+      }
+      box.innerHTML = renderMD(acc);
+    }
+    $('#tAiHint').textContent = '解读完成';
+  }catch(err){
+    if (err.name === 'AbortError'){
+      if (!acc){ box.innerHTML = '<p>请求超时或被中断。</p>'; tarotLocalNote(); }
+      return;
+    }
+    box.innerHTML = `<p style="color:#c9605a">调用失败：${esc(String(err.message || err))}</p>` + renderMD(acc);
+    tarotLocalNote();
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
+async function doDraw(){
+  if (tarotState.busy) return;
+  const count = tarotState.spread === 'one' ? 1 : 3;
+  const btn = $('#doDraw');
+  tarotState.busy = true;
+  btn.disabled = true;
+  btn.textContent = '洗 牌 中…';
+  $('#tDrawHint').textContent = '洗牌、切牌、落牌…请专注在你的问题上。';
+  tarotBacks(count);
+  await sleep(850);
+  const cards = tarotPick(count);
+  tarotState.cards = cards;
+  tarotShowFaces(cards);
+  $('#tDrawHint').textContent = '牌已落定。';
+  btn.textContent = '重新抽牌';
+  tarotState.busy = false;
+  btn.disabled = false;
+  await sleep(450);
+  tarotRenderResult();
+  $('#tAiBox').innerHTML = '';
+  goTarotStep(3);
+  callTarotAI();
+}
+
+function goTarotStep(n){
+  [1,2,3].forEach(i => {
+    $('#tstep' + i).classList.toggle('hidden', i !== n);
+    $('#st' + i).classList.toggle('on', i <= n);
+  });
+  if (n === 2) tarotBacks(tarotState.spread === 'one' ? 1 : 3);
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+let MODE = 'yijing';
+function setMode(m){
+  MODE = ['yijing','tarot','qimen'].indexOf(m) >= 0 ? m : 'yijing';
+  $$('#modes .mode').forEach(b => b.classList.toggle('on', b.dataset.mode === MODE));
+  [1,2,3].forEach(i => {
+    $('#step' + i).classList.add('hidden');
+    $('#tstep' + i).classList.add('hidden');
+    $('#qstep' + i).classList.add('hidden');
+  });
+  const labels = {
+    yijing: ['问 事','起 卦','解 卦'],
+    tarot:  ['问 事','抽 牌','解 牌'],
+    qimen:  ['问 事','起 局','解 局']
+  }[MODE];
+  labels.forEach((t, i) => { $('#st' + (i + 1)).innerHTML = '<i></i>' + t; });
+  if (MODE === 'tarot') goTarotStep(1);
+  else if (MODE === 'qimen') goQmStep(1);
+  else goStep(1);
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ================= 奇门遁甲（时家奇门 · 转盘 · 拆补法） ================= */
+const QM_GAN = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const QM_ZHI = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const QM_STARS = {1:'天蓬',2:'天芮',3:'天冲',4:'天辅',5:'天禽',6:'天心',7:'天柱',8:'天任',9:'天英'};
+const QM_DOORS = {1:'休门',2:'死门',3:'伤门',4:'杜门',6:'开门',7:'惊门',8:'生门',9:'景门'};
+const QM_GODS = ['值符','螣蛇','太阴','六合','白虎','玄武','九地','九天'];
+const QM_RING = [1,8,3,4,9,2,7,6];           // 洛书外圈顺行
+const QM_LAYOUT = [4,9,2,3,5,7,8,1,6];       // 九宫展示顺序（上南下北）
+const QM_PNAME = {1:'坎',2:'坤',3:'震',4:'巽',5:'中',6:'乾',7:'兑',8:'艮',9:'离'};
+const QM_JU = {
+  '冬至':[1,7,4],'小寒':[2,8,5],'大寒':[3,9,6],'立春':[8,5,2],'雨水':[9,6,3],'惊蛰':[1,7,4],
+  '春分':[3,9,6],'清明':[4,1,7],'谷雨':[5,2,8],'立夏':[4,1,7],'小满':[5,2,8],'芒种':[6,3,9],
+  '夏至':[9,3,6],'小暑':[8,2,5],'大暑':[7,1,4],'立秋':[2,5,8],'处暑':[1,4,7],'白露':[9,3,6],
+  '秋分':[7,1,4],'寒露':[6,9,3],'霜降':[5,8,2],'立冬':[6,9,3],'小雪':[5,8,2],'大雪':[4,7,1]
+};
+const QM_YANG = ['冬至','小寒','大寒','立春','雨水','惊蛰','春分','清明','谷雨','立夏','小满','芒种'];
+const QM_TERM_BY_DEG = ['春分','清明','谷雨','立夏','小满','芒种','夏至','小暑','大暑','立秋','处暑','白露',
+  '秋分','寒露','霜降','立冬','小雪','大雪','冬至','小寒','大寒','立春','雨水','惊蛰'];
+const Q_CHIPS = ['这个项目能不能签下来','这次面试结果如何','和他这段关系还有转机吗','这笔钱能收回来吗','该不该换工作','近期出行顺利吗'];
+const qmState = { q:'', time:null };
+let qmLast = null, qmAborter = null;
+
+function qmJDN(y, m, d){
+  const a = Math.floor((14 - m) / 12);
+  const yy = y + 4800 - a;
+  const mm = m + 12 * a - 3;
+  return d + Math.floor((153 * mm + 2) / 5) + 365 * yy + Math.floor(yy / 4)
+    - Math.floor(yy / 100) + Math.floor(yy / 400) - 32045;
+}
+function qmGzIndex(g, z){ let i = g; while (i % 12 !== z) i += 10; return i % 60; }
+function qmJD(date){ return date.getTime() / 86400000 + 2440587.5; }
+function qmNorm(x){ return ((x % 360) + 360) % 360; }
+function qmSunLon(jd){
+  const T = (jd - 2451545) / 36525;
+  const rad = Math.PI / 180;
+  const L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T * T;
+  const M = 357.52911 + 35999.05029 * T - 0.0001537 * T * T;
+  const C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(M * rad)
+    + (0.019993 - 0.000101 * T) * Math.sin(2 * M * rad)
+    + 0.000289 * Math.sin(3 * M * rad);
+  const omega = 125.04 - 1934.136 * T;
+  return qmNorm(L0 + C - 0.00569 - 0.00478 * Math.sin(omega * rad));
+}
+function qmTermBefore(date){
+  const jdNow = qmJD(date);
+  const L = qmSunLon(jdNow);
+  const k = Math.floor(L / 15) % 24;
+  const target = k * 15;
+  let a = jdNow, guard = 0;
+  while (qmNorm(qmSunLon(a) - target) < 300 && guard++ < 40) a -= 1;
+  let lo = a, hi = jdNow;
+  for (let i = 0; i < 40; i++){
+    const mid = (lo + hi) / 2;
+    if (qmNorm(qmSunLon(mid) - target) > 180) lo = mid; else hi = mid;
+  }
+  return { jd: (lo + hi) / 2, name: QM_TERM_BY_DEG[k] };
+}
+function qmPad(n){ return n < 10 ? '0' + n : '' + n; }
+function qmFmt(d){
+  return `${d.getFullYear()}-${qmPad(d.getMonth() + 1)}-${qmPad(d.getDate())} ${qmPad(d.getHours())}:${qmPad(d.getMinutes())}`;
+}
+/* 真太阳时：经度差校正（每度 4 分钟）+ 均时差 */
+function qmTrueSolar(date, lon){
+  const jd = qmJD(date);
+  const T = (jd - 2451545) / 36525;
+  const rad = Math.PI / 180;
+  const L0 = qmNorm(280.46646 + 36000.76983 * T + 0.0003032 * T * T);
+  const M = 357.52911 + 35999.05029 * T - 0.0001537 * T * T;
+  const e = 0.016708634 - 0.000042037 * T - 0.0000001267 * T * T;
+  const eps = 23.439291 - 0.0130042 * T;
+  const y = Math.pow(Math.tan(eps * rad / 2), 2);
+  const eot = 4 / rad * (
+    y * Math.sin(2 * L0 * rad)
+    - 2 * e * Math.sin(M * rad)
+    + 4 * e * y * Math.sin(M * rad) * Math.cos(2 * L0 * rad)
+    - 0.5 * y * y * Math.sin(4 * L0 * rad)
+    - 1.25 * e * e * Math.sin(2 * M * rad)
+  );
+  const lonMin = (lon - 120) * 4;
+  return new Date(date.getTime() + (lonMin + eot) * 60000);
+}
+
+function qmBuild(date, opts){
+  const o = opts || {};
+  const solar = o.tst ? qmTrueSolar(date, o.lon) : date;
+  const h = solar.getHours();
+  const dayDate = h >= 23 ? new Date(solar.getTime() + 86400000) : solar;
+  const jdn = qmJDN(dayDate.getFullYear(), dayDate.getMonth() + 1, dayDate.getDate());
+  const off = jdn - 2451545;
+  const dg = ((4 + off) % 10 + 10) % 10;
+  const dz = ((6 + off) % 12 + 12) % 12;
+  const dayIdx = qmGzIndex(dg, dz);
+  const hz = Math.floor(((h + 1) % 24) / 2);
+  const hg = (dg * 2 + hz) % 10;
+  const hourIdx = qmGzIndex(hg, hz);
+
+  const term = qmTermBefore(date);
+  const isYang = QM_YANG.indexOf(term.name) >= 0;
+  const headIdx = dayIdx - (dayIdx % 5);
+  const headZhi = headIdx % 12;
+  const yuan = [0,6,3,9].indexOf(headZhi) >= 0 ? 0
+    : ([2,8,5,11].indexOf(headZhi) >= 0 ? 1 : 2);
+  const ju = QM_JU[term.name][yuan];
+
+  /* 地盘：阳遁顺布、阴遁逆布 戊己庚辛壬癸丁丙乙 */
+  const ALL = ['戊','己','庚','辛','壬','癸','丁','丙','乙'];
+  const diPan = {};
+  let p = ju;
+  for (let i = 0; i < 9; i++){
+    diPan[p] = ALL[i];
+    p = isYang ? (p % 9) + 1 : ((p - 2 + 9) % 9) + 1;
+  }
+  const palaceOf = gan => { for (const k in diPan) if (diPan[k] === gan) return +k; return 2; };
+  const ringP = x => x === 5 ? 2 : x;
+
+  const xunStart = hourIdx - (hourIdx % 10);
+  const xunYi = ['戊','己','庚','辛','壬','癸'][xunStart / 10];
+  const fuPalace = palaceOf(xunYi);
+  const fuStar = fuPalace === 5 ? '天禽' : QM_STARS[fuPalace];
+  const shiGanChar = hg === 0 ? xunYi : QM_GAN[hg];
+  const shiPalace = palaceOf(shiGanChar);
+
+  const ri = QM_RING.indexOf(ringP(fuPalace));
+  const si = QM_RING.indexOf(ringP(shiPalace));
+  const shift = (si - ri + 8) % 8;
+
+  /* 天盘九星 + 天盘干 */
+  const starAt = {}, ganAt = {};
+  QM_RING.forEach((src, i) => {
+    const dest = QM_RING[(i + shift) % 8];
+    starAt[dest] = src === 2 ? ['天芮','天禽'] : [QM_STARS[src]];
+    ganAt[dest] = src === 2 ? [diPan[2], diPan[5]] : [diPan[src]];
+  });
+
+  /* 八门：值使门依阳顺阴逆随时辰转 */
+  const steps = hourIdx - xunStart;
+  const dir = isYang ? 1 : -1;
+  const doorShift = ((dir * steps) % 8 + 8) % 8;
+  const doorAt = {};
+  QM_RING.forEach((src, i) => {
+    doorAt[QM_RING[(i + doorShift) % 8]] = QM_DOORS[src];
+  });
+
+  /* 八神：值符随时干宫，阳顺阴逆 */
+  const gi = QM_RING.indexOf(ringP(shiPalace));
+  const godAt = {};
+  for (let k = 0; k < 8; k++){
+    godAt[QM_RING[((gi + dir * k) % 8 + 8) % 8]] = QM_GODS[k];
+  }
+
+  const metaText =
+    `${qmFmt(solar)}${o.tst ? `（真太阳时 · 东经${o.lon}°）` : ''}　` +
+    `${QM_GAN[dg]}${QM_ZHI[dz]}日 ${QM_GAN[hg]}${QM_ZHI[hz]}时　` +
+    `${term.name} · ${isYang ? '阳遁' : '阴遁'}${['上','中','下'][yuan]}元 · ${ju}局`;
+
+  return {
+    date, solar, opts: o, dg, dz, hg, hz, term: term.name, isYang, yuan, ju, diPan,
+    starAt, ganAt, doorAt, godAt, fuStar,
+    fuDoor: QM_DOORS[ringP(fuPalace)],
+    shiPalace, metaText
+  };
+}
+
+function qmCellHTML(p){
+  const c = qmLast;
+  if (p === 5){
+    return `<div class="qm-cell center"><div class="pname">中宫</div><div class="dg">地盘 ${c.diPan[5]}</div></div>`;
+  }
+  return `<div class="qm-cell">
+    <div class="pname">${QM_PNAME[p]}${p}</div>
+    <div class="god">${c.godAt[p] || ''}</div>
+    <div class="star">${(c.starAt[p] || []).join('')}</div>
+    <div class="door">${c.doorAt[p] || ''}</div>
+    <div class="tg">${(c.ganAt[p] || []).join('')}</div>
+    <div class="dg">${c.diPan[p]}</div>
+  </div>`;
+}
+
+function qmRender(date, opts){
+  qmLast = qmBuild(date, opts);
+  const c = qmLast;
+  $('#qmMeta').innerHTML =
+    `<b>${c.metaText}</b><br>值符：${c.fuStar}　值使：${c.fuDoor}`;
+  $('#qmGrid').innerHTML = QM_LAYOUT.map(qmCellHTML).join('');
+}
+
+function buildQmPrompt(){
+  const c = qmLast;
+  const rows = QM_LAYOUT.map(p => {
+    if (p === 5) return `中宫：地盘 ${c.diPan[5]}`;
+    return `${QM_PNAME[p]}${p}宫：八神${c.godAt[p] || '—'}，九星${(c.starAt[p] || []).join('')}，` +
+      `八门${c.doorAt[p] || '—'}，天盘干${(c.ganAt[p] || []).join('')}，地盘干${c.diPan[p]}`;
+  }).join('\n');
+  return `你是一位精通奇门遁甲的实战派师傅，说人话、讲实事，不故弄玄虚。
+
+【问事】
+${qmState.q}
+
+【起局】
+${c.metaText}
+值符：${c.fuStar}　值使：${c.fuDoor}
+
+【九宫盘】
+${rows}
+
+【解读要求】
+1. 先用两三句话给结论：这事能不能成、大概什么时候有动静。
+2. 找用神：根据问题判断该看哪一宫（求财看生门/戊、求工作看开门、感情看乙庚六合、文书看景门或丁），说明你为什么看这一宫。
+3. 分析用神宫的旺衰、门星神组合、天地盘干的生克，讲清楚吉在哪里、凶在哪里。
+4. 看对方宫（如合作方、对象）与用神宫的关系，判断主动被动、成事阻力。
+5. 给 3 条可操作建议，包含时机建议（几日内/哪个方向/找什么人）。
+6. 最后提醒最容易被忽略的一点。
+
+写法：像老师傅当面讲，禁止堆术语不解释，禁止说“作为AI”，全文 600-900 字，短标题分段，结论放最前面。`;
+}
+
+async function callQmAI(){
+  const cfg = getCfg();
+  const box = $('#qmAiBox');
+  if (!qmLast) return;
+  if (qmAborter) qmAborter.abort();
+  if (!cfg.base){
+    box.innerHTML = '';
+    $('#qmAiHint').textContent = '本地模式（未配置模型）';
+    const p = document.createElement('p');
+    p.style.cssText = 'color:#8a8f99;font-size:12.5px';
+    p.textContent = '上方九宫盘已按拆补法排出。点右上角 ⚙ 填入 API Key，可获得结合你问题的详细解局。';
+    box.appendChild(p);
+    return;
+  }
+  box.innerHTML = '<div class="thinking">正在解局 <span>·</span><span>·</span><span>·</span></div>';
+  $('#qmAiHint').textContent = `${cfg.model || '模型'} · 解局中`;
+  qmAborter = new AbortController();
+  const timer = setTimeout(() => qmAborter.abort(), 120000);
+  const proxy = /^\/api/.test(cfg.base) || !cfg.key;
+  let acc = '';
+  try{
+    const url = proxy
+      ? cfg.base.replace(/\/+$/, '') + '/chat'
+      : cfg.base.replace(/\/+$/, '') + '/chat/completions';
+    const headers = { 'Content-Type':'application/json' };
+    if (!proxy) headers['Authorization'] = 'Bearer ' + cfg.key;
+    const res = await fetch(url, {
+      method:'POST',
+      signal: qmAborter.signal,
+      headers,
+      body: JSON.stringify({
+        model: cfg.model || 'deepseek-chat',
+        stream: true,
+        temperature: 0.85,
+        messages: [
+          { role:'system', content:'你是一位精通奇门遁甲的实战派师傅，解读务实、说人话。' },
+          { role:'user', content: buildQmPrompt() }
+        ]
+      })
+    });
+    if (!res.ok){
+      const errText = await res.text().catch(() => '');
+      throw new Error('HTTP ' + res.status + ' ' + errText.slice(0, 160));
+    }
+    const ctype = res.headers.get('content-type') || '';
+    if (ctype.indexOf('event-stream') === -1){
+      const j = await res.json().catch(() => null);
+      const text = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+      if (!text) throw new Error((j && j.error && (j.error.message || j.error)) || '接口无返回内容');
+      acc = text;
+      box.innerHTML = renderMD(acc);
+    } else {
+      const reader = res.body.getReader();
+      const dec = new TextDecoder('utf-8');
+      let buf = '';
+      while (true){
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream:true });
+        const parts = buf.split('\n');
+        buf = parts.pop();
+        for (const line of parts){
+          const s = line.trim();
+          if (!s.startsWith('data:')) continue;
+          const data = s.slice(5).trim();
+          if (data === '[DONE]') continue;
+          try{
+            const j = JSON.parse(data);
+            const delta = j.choices && j.choices[0] && j.choices[0].delta;
+            if (delta && delta.content){
+              acc += delta.content;
+              box.innerHTML = renderMD(acc) + '<span class="cursor"></span>';
+              box.scrollIntoView({ block:'nearest' });
+            }
+          }catch(e){ /* 忽略半包 */ }
+        }
+      }
+      if (!acc.trim()){
+        box.innerHTML = '<p>接口没有返回内容，请检查模型名或额度。</p>';
+        return;
+      }
+      box.innerHTML = renderMD(acc);
+    }
+    $('#qmAiHint').textContent = '解局完成';
+  }catch(err){
+    if (err.name === 'AbortError'){
+      if (!acc) box.innerHTML = '<p>请求超时或被中断。</p>';
+      return;
+    }
+    box.innerHTML = `<p style="color:#c9605a">调用失败：${esc(String(err.message || err))}</p>` + renderMD(acc);
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
+function goQmStep(n){
+  [1,2,3].forEach(i => {
+    $('#qstep' + i).classList.toggle('hidden', i !== n);
+    $('#st' + i).classList.toggle('on', i <= n);
+  });
+  if (n === 2) $('#qmNow').textContent = '当前时间：' + qmFmt(new Date());
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
 /* ================= 设置面板 ================= */
 const PRESETS = {
   deepseek:{ base:'https://api.deepseek.com/v1', model:'deepseek-chat' },
@@ -1673,6 +2498,93 @@ function init(){
   $('#payMask').addEventListener('click', e => {
     if (e.target === $('#payMask')) closePay();
   });
+
+  /* ---- 塔罗占卜事件 ---- */
+  $('#tChips').innerHTML = T_CHIPS.map(q => `<span class="chip">${q}</span>`).join('');
+  $('#tChips').addEventListener('click', e => {
+    if (!e.target.classList.contains('chip')) return;
+    $('#tquestion').value = e.target.textContent;
+    $('#tquestion').focus();
+  });
+  $('#modes').addEventListener('click', e => {
+    const b = e.target.closest('.mode');
+    if (!b) return;
+    setMode(b.dataset.mode);
+  });
+  $('#toTStep2').onclick = () => {
+    const q = $('#tquestion').value.trim();
+    if (!q){ toast('先写下你想问的事'); $('#tquestion').focus(); return; }
+    tarotState.q = q;
+    tarotState.cards = null;
+    goTarotStep(2);
+  };
+  $('#tquestion').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) $('#toTStep2').click();
+  });
+  $('#tSpreads').addEventListener('click', e => {
+    const el = e.target.closest('.method');
+    if (!el) return;
+    $$('#tSpreads .method').forEach(m => m.classList.toggle('on', m === el));
+    tarotState.spread = el.dataset.s;
+    tarotBacks(tarotState.spread === 'one' ? 1 : 3);
+    $('#tDrawHint').textContent = '心中默念问题，点击下方按钮，牌会为你而落。';
+    $('#doDraw').textContent = '洗 牌 抽 牌';
+  });
+  $('#backT1').onclick = () => goTarotStep(1);
+  $('#doDraw').onclick = doDraw;
+  $('#tAgain').onclick = () => { if (tarotState.cards) callTarotAI(); };
+  $('#tNew').onclick = () => {
+    if (tarotAborter) tarotAborter.abort();
+    tarotState.cards = null;
+    $('#tAiBox').innerHTML = '';
+    tarotBacks(tarotState.spread === 'one' ? 1 : 3);
+    $('#tDrawHint').textContent = '心中默念问题，点击下方按钮，牌会为你而落。';
+    $('#doDraw').textContent = '洗 牌 抽 牌';
+    goTarotStep(2);
+  };
+
+  /* ---- 奇门遁甲事件 ---- */
+  $('#qChips').innerHTML = Q_CHIPS.map(q => `<span class="chip">${q}</span>`).join('');
+  $('#qChips').addEventListener('click', e => {
+    if (!e.target.classList.contains('chip')) return;
+    $('#qquestion').value = e.target.textContent;
+    $('#qquestion').focus();
+  });
+  $('#toQStep2').onclick = () => {
+    const q = $('#qquestion').value.trim();
+    if (!q){ toast('先写下你想问的事'); $('#qquestion').focus(); return; }
+    qmState.q = q;
+    goQmStep(2);
+  };
+  $('#qquestion').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) $('#toQStep2').click();
+  });
+  $('#backQ1').onclick = () => goQmStep(1);
+  $('#doQiMen').onclick = () => {
+    let d = new Date();
+    const v = $('#qmTime').value;
+    if (v){
+      const t = new Date(v);
+      if (isNaN(t.getTime())){ $('#qmErr').textContent = '时间格式不对'; return; }
+      d = t;
+    }
+    $('#qmErr').textContent = '';
+    qmState.time = d;
+    const tst = $('#qmTst').checked;
+    let lon = parseFloat($('#qmLon').value);
+    if (isNaN(lon)) lon = 120;
+    lon = Math.max(73, Math.min(135, lon));
+    qmRender(d, { tst, lon });
+    goQmStep(3);
+    callQmAI();
+  };
+  $('#qmAgain').onclick = () => { if (qmLast) callQmAI(); };
+  $('#qmNew').onclick = () => {
+    if (qmAborter) qmAborter.abort();
+    $('#qmAiBox').innerHTML = '';
+    $('#qmAiHint').textContent = '正在为你解局…';
+    goQmStep(2);
+  };
 
   $('#gearBtn').onclick = openSet;
   $('#closeSet').onclick = () => $('#settings').classList.add('hidden');
