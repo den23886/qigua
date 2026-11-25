@@ -644,7 +644,7 @@
   </div>
 
   <div class="foot">
-    卦象与牌面仅供参考 · 谋事在人<br />本程序不构成任何投资、医疗、法律建议<br />本站为传统文化研究与心理陪伴类内容，不提供任何形式的收费预测服务
+    卦象与牌面仅供参考 · 谋事在人<br />本程序不构成任何投资、医疗、法律建议<br />本站为传统文化研究与心理陪伴类内容，不提供任何形式的收费预测服务<br /><a href="https://afdian.com/a/qigua-tool" target="_blank" rel="noopener" style="color:var(--gold-2)">支持这个项目 · 爱发电</a>
   </div>
 </div>
 
@@ -1170,7 +1170,7 @@ const EXPIRY_WARN_DAYS = 7;
 
 /* ================= 会员入口（爱发电） ================= */
 /* 入驻爱发电后，把主页链接填在这里，例如 https://afdian.com/a/yourname */
-const MEMBER_URL = '';
+const MEMBER_URL = 'https://afdian.com/a/qigua-tool';
 (function(){
   const a = $('#memberBtn');
   const pb = $('#payAfdianBtn');
@@ -1192,6 +1192,7 @@ const MEMBER_URL = '';
     a.href = MEMBER_URL;
     a.target = '_blank';
     a.rel = 'noopener';
+    a.textContent = '去爱发电订阅会员';
   }else{
     a.removeAttribute('href');
     a.style.cursor = 'pointer';
