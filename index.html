@@ -117,6 +117,11 @@
   .method .ds{font-size:11px;color:var(--dim);margin-top:2px;line-height:1.5}
   .method.on{border-color:rgba(217,178,106,.6);background:linear-gradient(160deg,rgba(217,178,106,.16),rgba(217,178,106,.03));box-shadow:0 0 22px -10px rgba(217,178,106,.9)}
   .method.on .nm{color:var(--gold-2)}
+  .method .badge{
+    position:absolute;top:8px;right:8px;font-size:9px;letter-spacing:.06em;line-height:1.5;
+    padding:0 5px;border-radius:5px;color:var(--gold-2);
+    border:1px solid rgba(217,178,106,.4);background:rgba(217,178,106,.1);
+  }
   /* ---------- 结果 ---------- */
   .hidden{display:none!important}
   .gua-head{display:flex;gap:16px;align-items:center;margin-bottom:12px}
@@ -305,6 +310,12 @@
     background:rgba(111,174,139,.08);
   }
   .tcard .tpos.rev{border-color:rgba(201,96,90,.45);color:#e0928c;background:rgba(201,96,90,.08)}
+  /* 十张牌：两行五列，手机上也能一屏看全 */
+  .tarot-table.many{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;min-height:0;align-items:stretch}
+  .tarot-table.many .tcard{width:100%;max-width:64px;height:96px;justify-self:center;gap:3px;border-radius:8px}
+  .tarot-table.many .tcard .tnum{font-size:13px}
+  .tarot-table.many .tcard .tname{font-size:10px;letter-spacing:0}
+  .tarot-table.many .tcard .tpos{top:4px;right:4px;font-size:8px;padding:0 4px}
   .tr-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px dashed var(--line)}
   .tr-item:last-child{border-bottom:none}
   .tr-card{
@@ -322,6 +333,12 @@
   .tr-name .rev{color:#e0928c}
   .tr-kw{font-size:12px;color:#a9b0bd;margin-top:4px}
   .tr-mean{font-size:12.5px;color:var(--dim);line-height:1.75;margin-top:6px}
+  /* ---------- 历史记录 ---------- */
+  .his-item{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line);font-size:12.5px}
+  .his-item:last-child{border-bottom:none}
+  .his-t{flex:0 0 auto;color:#8a8f99;font-size:11px;font-variant-numeric:tabular-nums}
+  .his-type{flex:0 0 auto;color:var(--gold-2);border:1px solid rgba(217,178,106,.3);border-radius:5px;padding:0 5px;font-size:10px;line-height:1.6}
+  .his-sum{flex:1;min-width:0;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   /* ---------- 奇门 ---------- */
   .modes{flex-wrap:wrap}
   .mode{padding:8px 16px}
@@ -523,6 +540,11 @@
           <span class="ic">◈</span><div class="nm">单张指引</div>
           <div class="ds">此刻最需要看到的一张</div>
         </div>
+        <div class="method" data-s="celtic">
+          <span class="badge">会员</span>
+          <span class="ic">✚</span><div class="nm">凯尔特十字</div>
+          <div class="ds">十张牌 · 深入一件事的全局</div>
+        </div>
       </div>
     </div>
 
@@ -609,8 +631,20 @@
     </div>
   </section>
 
+  <div class="card" id="historyCard">
+    <h2>历史记录</h2>
+    <div id="historyBody"></div>
+  </div>
+
+  <div class="card" id="memberCard">
+    <h2>会员</h2>
+    <p class="hint">¥9.9 一次买断，解锁：不限次数 · 凯尔特十字牌阵 · 历史记录</p>
+    <div class="row"><a class="btn gold sm" id="memberBtn" style="text-decoration:none">立即解锁</a></div>
+    <p class="hint" style="margin-top:10px">会员权益为内容与工具服务，不承诺任何预测结果。</p>
+  </div>
+
   <div class="foot">
-    卦象与牌面仅供参考 · 谋事在人<br />本程序不构成任何投资、医疗、法律建议
+    卦象与牌面仅供参考 · 谋事在人<br />本程序不构成任何投资、医疗、法律建议<br />本站为传统文化研究与心理陪伴类内容，不提供任何形式的收费预测服务
   </div>
 </div>
 
@@ -1124,12 +1158,30 @@ const DEFAULT_CFG = {
 };
 /* ================= 免费额度与付费解锁 ================= */
 /* 说明：额度与权益存在浏览器本地，仅作产品限制，非安全边界 */
-const FREE_LIMIT = 999;      // 每天免费次数（付费已关闭，等同不限次数）
-const PLUS_LIMIT = 8;        // 9.9 买断后每天次数
+const FREE_LIMIT = 3;        // 每天免费次数
+const PLUS_LIMIT = 8;        // 会员不限次数（保留占位值）
 const USAGE_KEY = 'qigua_usage_v1';
 const ENT_KEY = 'qigua_ent_v1';
 const CODE_SECRET = 'x8Fq2LmZ7VtR';
 const CONTACT_WX = '（待配置）';  // 收款后答疑的微信号
+
+/* ================= 会员入口（爱发电） ================= */
+/* 入驻爱发电后，把主页链接填在这里，例如 https://afdian.com/a/yourname */
+const MEMBER_URL = '';
+(function(){
+  const a = $('#memberBtn');
+  if(!a) return;
+  if(MEMBER_URL){
+    a.href = MEMBER_URL;
+    a.target = '_blank';
+    a.rel = 'noopener';
+  }else{
+    a.removeAttribute('href');
+    a.style.cursor = 'pointer';
+    a.textContent = '立即解锁';
+    a.addEventListener('click', e => { e.preventDefault(); openPay('A'); });
+  }
+})();
 function usageToday(){
   try{
     const u = JSON.parse(localStorage.getItem(USAGE_KEY)) || {};
@@ -1143,18 +1195,88 @@ function bumpUsage(){
   localStorage.setItem(USAGE_KEY, JSON.stringify({ d, n }));
   return n;
 }
-/* 已购权益：plus5=每天8次，chat=永久解锁追问 */
-/* 付费已关闭：追问默认永久解锁，不再需要购买 */
+/* 已购权益：plus5=会员（不限次数 + 会员牌阵 + 历史记录），chat=追问 */
 function getEnt(){
   try{
     const o = JSON.parse(localStorage.getItem(ENT_KEY)) || {};
-    o.chat = true;
+    if (typeof o.chat !== 'boolean') o.chat = true;  // 追问默认免费开放
     return o;
   }catch(e){ return { chat: true }; }
 }
 function setEnt(o){ localStorage.setItem(ENT_KEY, JSON.stringify(o)); }
-function dailyLimit(){ return getEnt().plus5 ? PLUS_LIMIT : FREE_LIMIT; }
+function isVip(){ return !!getEnt().plus5; }
+function dailyLimit(){ return isVip() ? 99999 : FREE_LIMIT; }
 function remainToday(){ return Math.max(0, dailyLimit() - usageToday()); }
+
+/* ================= 历史记录（会员） ================= */
+const HIS_KEY = 'qigua_history_v1';
+const HIS_MAX = 50;
+const HIS_TYPE = { yijing:'易经', tarot:'塔罗', qimen:'奇门' };
+let hisExpanded = false;
+
+function getHistory(){
+  try{
+    const a = JSON.parse(localStorage.getItem(HIS_KEY));
+    return Array.isArray(a) ? a : [];
+  }catch(e){ return []; }
+}
+function addHistory(type, q, sum){
+  if (!isVip()) return;
+  try{
+    const a = getHistory();
+    a.unshift({
+      t: Date.now(),
+      type,
+      q: String(q || '').slice(0, 80),
+      sum: String(sum || '').slice(0, 60)
+    });
+    localStorage.setItem(HIS_KEY, JSON.stringify(a.slice(0, HIS_MAX)));
+  }catch(e){ return; }
+  renderHistory();
+}
+function hisTime(ts){
+  const d = new Date(ts);
+  const p = n => (n < 10 ? '0' + n : '' + n);
+  return `${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function renderHistory(){
+  const box = $('#historyBody');
+  if (!box) return;
+  if (!isVip()){
+    hisExpanded = false;
+    box.innerHTML = '<p class="hint">会员可自动保存最近 50 次记录</p>' +
+      '<div class="row"><button class="btn ghost sm" id="historyUnlock">解锁</button></div>';
+    const b = $('#historyUnlock');
+    if (b) b.onclick = () => openPay('A');
+    return;
+  }
+  const all = getHistory();
+  if (!all.length){
+    box.innerHTML = '<p class="hint">还没有记录。起卦、抽牌或起局后会自动保存在这里。</p>';
+    return;
+  }
+  const list = hisExpanded ? all : all.slice(0, 10);
+  box.innerHTML = list.map(h =>
+    `<div class="his-item">
+      <span class="his-t">${hisTime(h.t)}</span>
+      <span class="his-type">${HIS_TYPE[h.type] || '记录'}</span>
+      <span class="his-sum" title="${esc((h.q || '') + (h.sum ? ' · ' + h.sum : '')).replace(/"/g, '&quot;')}">${esc(h.sum || h.q || '')}</span>
+    </div>`).join('') +
+    '<div class="row">' +
+      (all.length > 10 ? `<button class="btn ghost sm" id="hisMore">${hisExpanded ? '收起' : '查看全部'}</button>` : '') +
+      '<button class="btn ghost sm" id="hisClear">清空</button>' +
+    '</div>';
+  const more = $('#hisMore');
+  if (more) more.onclick = () => { hisExpanded = !hisExpanded; renderHistory(); };
+  const clr = $('#hisClear');
+  if (clr) clr.onclick = () => {
+    if (!confirm('确定清空全部历史记录？')) return;
+    localStorage.removeItem(HIS_KEY);
+    hisExpanded = false;
+    renderHistory();
+    toast('已清空历史记录');
+  };
+}
 /* 激活码签名（与本地发码工具保持一致） */
 function codeSig(type, serial){
   const s = type + '|' + serial + '|' + CODE_SECRET;
@@ -1177,7 +1299,7 @@ function redeem(code){
   if (type === 'A'){
     if (e.plus5) return { ok:true, msg:'该权益已解锁，无需重复使用' };
     e.plus5 = true; setEnt(e);
-    return { ok:true, type:'A', msg:'解锁成功：每天 8 次' };
+    return { ok:true, type:'A', msg:'解锁成功：已解锁全部功能' };
   }
   if (e.chat) return { ok:true, msg:'该权益已解锁，无需重复使用' };
   e.chat = true; setEnt(e);
@@ -1230,7 +1352,8 @@ async function doAcct(action){
     const e = mergeEnt(d.ent);
     closePay();
     if (e.chat && S.result) showChatArea();
-    if (e.plus5 && $('#aiHint')) $('#aiHint').textContent = `已提升至每天 ${PLUS_LIMIT} 次 · 今日剩余 ${remainToday()} 次`;
+    if (e.plus5 && $('#aiHint')) $('#aiHint').textContent = '会员 · 已解锁全部功能';
+    renderHistory();
     toast('已登录 ' + d.phone + '，权益已同步');
   }catch(err){
     acctTip(err.message);
@@ -1384,15 +1507,15 @@ function loadPendingOrder(){
   try{ return JSON.parse(localStorage.getItem(PENDING_KEY)) || null; }catch(e){ return null; }
 }
 
-function openPay(kind){
+function openPay(kind, title){
   payKind = kind === 'C' ? 'C' : 'A';
   const isChat = payKind === 'C';
-  $('#payTitle').textContent = isChat ? '解锁「继续追问」' : '今日次数已用完';
+  $('#payTitle').textContent = isChat ? '解锁「继续追问」' : (title || '解锁全部功能');
   $('#payPrice').textContent = isChat ? '19.9' : '9.9';
   $('#payPriceInline').textContent = isChat ? '19.9' : '9.9';
   $('#payDesc').innerHTML = isChat
     ? '一次买断，永久解锁继续追问：解卦之后可以围绕这一卦随时追问小易。追问同样计入每日次数。'
-    : `每天免费 ${FREE_LIMIT} 次已用完。一次买断，之后每天可用 ${PLUS_LIMIT} 次，永久有效。`;
+    : '免费用户每天 3 次。解锁后不限次数，并开放凯尔特十字牌阵与历史记录。一次买断，永久有效。';
   $('#payWx').textContent = CONTACT_WX;
   $('#payCode').value = '';
   const acct = getAcct();
@@ -1476,8 +1599,9 @@ function applyUnlock(type){
   if (!e.plus5){ e.plus5 = true; setEnt(e); }
   syncEnt();
   closePay();
-  $('#aiHint').textContent = `已提升至每天 ${PLUS_LIMIT} 次 · 今日剩余 ${remainToday()} 次`;
-  toast('解锁成功：每天 ' + PLUS_LIMIT + ' 次');
+  $('#aiHint').textContent = '会员 · 已解锁全部功能';
+  toast('解锁成功：已解锁全部功能');
+  renderHistory();
   if (remainToday() > 0 && S.result) callAI(S.result);
 }
 
@@ -1602,7 +1726,7 @@ async function callAI(r){
     }
     box.innerHTML = renderMD(acc);
     if (proxy) bumpUsage();
-    $('#aiHint').textContent = '解读完成 · 今日剩余 ' + remainToday() + ' 次';
+    $('#aiHint').textContent = isVip() ? '解读完成 · 会员不限次数' : '解读完成 · 今日剩余 ' + remainToday() + ' 次';
     // 保存对话历史，显示多轮对话区域
     currentResult = r;
     chatHistory = [
@@ -1756,6 +1880,7 @@ async function doCast(){
     }
     resetChat();
     renderResult(r);
+    addHistory('yijing', r.q || S.q, r.name + ' · ' + (r.brief || '').split('。')[0]);
     $('#aiBox').innerHTML = '';
     $('#aiTitle').textContent = '小易解卦';
     goStep(3);
@@ -1837,7 +1962,14 @@ const TAROT = [
     um:'一个周期走到了终点，收获和认可都会到来。可以准备庆祝，也可以准备下一个开始。',
     rm:'已经走到 99%，却卡在最后一步。差的那一点，往往是你最不愿意面对的地方。' }
 ];
-const TAROT_POS = { one:['此刻'], three:['过去','现在','未来'] };
+const TAROT_POS = {
+  one: ['此刻'],
+  three: ['过去','现在','未来'],
+  celtic: ['现状','阻碍','根基','过去','目标','未来','自我','环境','希望与恐惧','结果']
+};
+const SPREAD_NAME = { one:'单张指引', three:'三张牌', celtic:'凯尔特十字' };
+const SPREAD_COUNT = { one:1, three:3, celtic:10 };
+function spreadCount(s){ return SPREAD_COUNT[s] || 3; }
 const T_CHIPS = ['这段关系会怎么发展','这份工作还值得坚持吗','我该不该做这个决定','最近为什么总觉得不顺','这次机会我能抓住吗','我内心真正想要的是什么'];
 const tarotState = { q:'', spread:'three', cards:null, busy:false };
 let tarotAborter = null;
@@ -1853,7 +1985,9 @@ function tarotPick(count){
 }
 
 function tarotBacks(count){
-  $('#tarotTable').innerHTML = Array.from({ length: count }, (_, i) =>
+  const table = $('#tarotTable');
+  table.classList.toggle('many', count > 3);
+  table.innerHTML = Array.from({ length: count }, (_, i) =>
     `<div class="tcard back" style="animation-delay:${i * 0.1}s"></div>`).join('');
 }
 
@@ -1896,7 +2030,10 @@ function buildTarotPrompt(){
   }).join('\n\n');
   const layout = spread === 'one'
     ? '单张指引（一张牌，看此刻最需要看到的信息）'
-    : '三张牌阵（过去 · 现在 · 未来，依次对应）';
+    : spread === 'celtic'
+      ? '凯尔特十字牌阵（十张，依次对应：现状、阻碍、根基、过去、目标、未来、自我、环境、希望与恐惧、结果）'
+      : '三张牌阵（过去 · 现在 · 未来，依次对应）';
+  const wordHint = spread === 'celtic' ? '900-1400' : '600-900';
   return `你是一位温和、通透、不说空话的塔罗解读师，擅长把牌面翻译成普通人能听懂的生活建议。
 
 【问卜人的问题】
@@ -1914,7 +2051,7 @@ ${detail}
 4. 给出 3 条能落地的建议：该做什么、别做什么、什么时候动。
 5. 最后一句提醒：这段解读里最容易被忽略、但最该记住的一点。
 
-写法要求：像朋友聊天，禁止文言腔，禁止堆砌玄学术语，禁止说“作为AI”。全文 600-900 字，用短小标题分段，结论放最前面。`;
+写法要求：像朋友聊天，禁止文言腔，禁止堆砌玄学术语，禁止说“作为AI”。全文 ${wordHint} 字，用短小标题分段，结论放最前面。`;
 }
 
 function tarotLocalNote(){
@@ -2019,7 +2156,12 @@ async function callTarotAI(){
 
 async function doDraw(){
   if (tarotState.busy) return;
-  const count = tarotState.spread === 'one' ? 1 : 3;
+  if (tarotState.spread === 'celtic' && !isVip()){
+    toast('凯尔特十字为会员牌阵');
+    openPay('A', '凯尔特十字为会员牌阵');
+    return;
+  }
+  const count = spreadCount(tarotState.spread);
   const btn = $('#doDraw');
   tarotState.busy = true;
   btn.disabled = true;
@@ -2036,6 +2178,8 @@ async function doDraw(){
   btn.disabled = false;
   await sleep(450);
   tarotRenderResult();
+  addHistory('tarot', tarotState.q,
+    (SPREAD_NAME[tarotState.spread] || '塔罗') + '：' + cards.map(c => TAROT[c.idx].n).join('、'));
   $('#tAiBox').innerHTML = '';
   goTarotStep(3);
   callTarotAI();
@@ -2046,7 +2190,7 @@ function goTarotStep(n){
     $('#tstep' + i).classList.toggle('hidden', i !== n);
     $('#st' + i).classList.toggle('on', i <= n);
   });
-  if (n === 2) tarotBacks(tarotState.spread === 'one' ? 1 : 3);
+  if (n === 2) tarotBacks(spreadCount(tarotState.spread));
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 
@@ -2524,9 +2668,15 @@ function init(){
   $('#tSpreads').addEventListener('click', e => {
     const el = e.target.closest('.method');
     if (!el) return;
+    const s = el.dataset.s;
+    if (s === 'celtic' && !isVip()){
+      toast('凯尔特十字为会员牌阵');
+      openPay('A', '凯尔特十字为会员牌阵');
+      return;
+    }
     $$('#tSpreads .method').forEach(m => m.classList.toggle('on', m === el));
-    tarotState.spread = el.dataset.s;
-    tarotBacks(tarotState.spread === 'one' ? 1 : 3);
+    tarotState.spread = s;
+    tarotBacks(spreadCount(s));
     $('#tDrawHint').textContent = '心中默念问题，点击下方按钮，牌会为你而落。';
     $('#doDraw').textContent = '洗 牌 抽 牌';
   });
@@ -2537,7 +2687,7 @@ function init(){
     if (tarotAborter) tarotAborter.abort();
     tarotState.cards = null;
     $('#tAiBox').innerHTML = '';
-    tarotBacks(tarotState.spread === 'one' ? 1 : 3);
+    tarotBacks(spreadCount(tarotState.spread));
     $('#tDrawHint').textContent = '心中默念问题，点击下方按钮，牌会为你而落。';
     $('#doDraw').textContent = '洗 牌 抽 牌';
     goTarotStep(2);
@@ -2575,6 +2725,7 @@ function init(){
     if (isNaN(lon)) lon = 120;
     lon = Math.max(73, Math.min(135, lon));
     qmRender(d, { tst, lon });
+    addHistory('qimen', qmState.q, (qmLast && qmLast.metaText) || '奇门起局');
     goQmStep(3);
     callQmAI();
   };
@@ -2630,7 +2781,8 @@ function init(){
     try{
       const d = await acctApi({ action: 'me', token: acct.token });
       const e = mergeEnt(d.ent);
-      if (e.plus5 && $('#aiHint')) $('#aiHint').textContent = `已提升至每天 ${PLUS_LIMIT} 次 · 今日剩余 ${remainToday()} 次`;
+      if (e.plus5 && $('#aiHint')) $('#aiHint').textContent = '会员 · 已解锁全部功能';
+      renderHistory();
       if (e.chat && S.result) showChatArea();
     }catch(err){ /* 登录过期，忽略 */ }
   })();
@@ -2647,6 +2799,7 @@ function init(){
     rememberOrder(null);
   }
 
+  renderHistory();
   updateTimePreview();
   setInterval(updateTimePreview, 1000);
 }
