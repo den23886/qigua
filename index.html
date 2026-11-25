@@ -638,7 +638,7 @@
 
   <div class="card" id="memberCard">
     <h2>会员</h2>
-    <p class="hint">¥9.9 一次买断，解锁：不限次数 · 凯尔特十字牌阵 · 历史记录</p>
+    <p class="hint">会员：不限次数 · 凯尔特十字牌阵 · 历史记录。9.9/月 · 25/季 · 89/年</p>
     <div class="row"><a class="btn gold sm" id="memberBtn" style="text-decoration:none">立即解锁</a></div>
     <p class="hint" style="margin-top:10px">会员权益为内容与工具服务，不承诺任何预测结果。</p>
   </div>
@@ -1159,11 +1159,12 @@ const DEFAULT_CFG = {
 /* ================= 免费额度与付费解锁 ================= */
 /* 说明：额度与权益存在浏览器本地，仅作产品限制，非安全边界 */
 const FREE_LIMIT = 3;        // 每天免费次数
-const PLUS_LIMIT = 8;        // 会员不限次数（保留占位值）
 const USAGE_KEY = 'qigua_usage_v1';
 const ENT_KEY = 'qigua_ent_v1';
 const CODE_SECRET = 'x8Fq2LmZ7VtR';
-const CONTACT_WX = '（待配置）';  // 收款后答疑的微信号
+
+/* 会员到期提醒阈值（天） */
+const EXPIRY_WARN_DAYS = 7;
 
 /* ================= 会员入口（爱发电） ================= */
 /* 入驻爱发电后，把主页链接填在这里，例如 https://afdian.com/a/yourname */
@@ -1195,7 +1196,7 @@ function bumpUsage(){
   localStorage.setItem(USAGE_KEY, JSON.stringify({ d, n }));
   return n;
 }
-/* 已购权益：plus5=会员（不限次数 + 会员牌阵 + 历史记录），chat=追问 */
+/* 已购权益：plus5=会员，expiry=到期日(YYYYMMDD字符串) */
 function getEnt(){
   try{
     const o = JSON.parse(localStorage.getItem(ENT_KEY)) || {};
@@ -1204,9 +1205,48 @@ function getEnt(){
   }catch(e){ return { chat: true }; }
 }
 function setEnt(o){ localStorage.setItem(ENT_KEY, JSON.stringify(o)); }
-function isVip(){ return !!getEnt().plus5; }
+
+/* 把 YYYYMMDD 字符串转 Date（UTC 午夜） */
+function ymdToDate(ymd){
+  if (!ymd) return null;
+  const y = parseInt(ymd.slice(0, 4), 10);
+  const m = parseInt(ymd.slice(4, 6), 10) - 1;
+  const d = parseInt(ymd.slice(6, 8), 10);
+  return new Date(Date.UTC(y, m, d));
+}
+/* 今天 YYYYMMDD */
+function todayYmd(){
+  const d = new Date();
+  const p = n => (n < 10 ? '0' + n : '' + n);
+  return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}`;
+}
+/* 两个 YYYYMMDD 之间相差的自然日（整数） */
+function daysBetween(a, b){
+  const t1 = ymdToDate(a).getTime();
+  const t2 = ymdToDate(b).getTime();
+  return Math.round((t2 - t1) / 86400000);
+}
+
+function isVip(){
+  const e = getEnt();
+  if (!e.plus5) return false;
+  if (!e.expiry) return true;  // 旧激活码兼容：没到期日视为永久
+  return todayYmd() <= e.expiry;
+}
 function dailyLimit(){ return isVip() ? 99999 : FREE_LIMIT; }
 function remainToday(){ return Math.max(0, dailyLimit() - usageToday()); }
+
+/* 会员状态描述（给弹窗和提示用） */
+function vipStatusText(){
+  if (!isVip()) return '';
+  const e = getEnt();
+  if (!e.expiry) return '会员（永久）';
+  const left = daysBetween(todayYmd(), e.expiry);
+  if (left < 0) return '会员已过期';
+  if (left === 0) return '今天到期';
+  if (left <= EXPIRY_WARN_DAYS) return `还有 ${left} 天到期`;
+  return `会员有效期至 ${e.expiry}`;
+}
 
 /* ================= 历史记录（会员） ================= */
 const HIS_KEY = 'qigua_history_v1';
@@ -1277,9 +1317,13 @@ function renderHistory(){
     toast('已清空历史记录');
   };
 }
-/* 激活码签名（与本地发码工具保持一致） */
-function codeSig(type, serial){
-  const s = type + '|' + serial + '|' + CODE_SECRET;
+/* 激活码签名（与本地发码工具保持一致）
+ * 新格式（订阅制，5 段）：QG-S-000001-20270125-MHKK3YL5
+ *   type='S'  serial  expiry(YYYYMMDD)  sig(8)
+ * 旧格式（永久，4 段）：QG-A-000001-MHKK3YL5   仍可识别
+ */
+function codeSig(type, serial, expiry){
+  const s = type + '|' + serial + '|' + (expiry || '') + '|' + CODE_SECRET;
   let h1 = 0x811c9dc5, h2 = 0x1000193;
   for (let i = 0; i < s.length; i++){
     const c = s.charCodeAt(i);
@@ -1291,19 +1335,56 @@ function codeSig(type, serial){
 }
 function redeem(code){
   const parts = String(code || '').trim().toUpperCase().replace(/\s+/g, '').split('-');
-  if (parts.length !== 4 || parts[0] !== 'QG') return { ok:false, msg:'激活码格式不对，请检查后重试' };
+  if (parts.length < 4 || parts[0] !== 'QG') return { ok:false, msg:'激活码格式不对，请检查后重试' };
   const type = parts[1], serial = parts[2];
-  if ((type !== 'A' && type !== 'C') || serial.length !== 6) return { ok:false, msg:'激活码格式不对，请检查后重试' };
-  if (codeSig(type, serial) !== parts[3]) return { ok:false, msg:'激活码无效，请核对后重试' };
-  const e = getEnt();
-  if (type === 'A'){
-    if (e.plus5) return { ok:true, msg:'该权益已解锁，无需重复使用' };
-    e.plus5 = true; setEnt(e);
-    return { ok:true, type:'A', msg:'解锁成功：已解锁全部功能' };
+  if (serial.length !== 6) return { ok:false, msg:'激活码格式不对，请检查后重试' };
+
+  /* 新订阅格式：QG-S-serial-YYYYMMDD-sig  共 5 段 */
+  if (parts.length === 5 && type === 'S'){
+    const expiry = parts[3];
+    const sig = parts[4];
+    if (!/^\d{8}$/.test(expiry)) return { ok:false, msg:'激活码格式不对，请检查后重试' };
+    if (codeSig('S', serial, expiry) !== sig) return { ok:false, msg:'激活码无效，请核对后重试' };
+    /* 过期激活码直接拒绝 */
+    if (expiry < todayYmd()) return { ok:false, msg:'这枚激活码已过期，请到爱发电续费' };
+    const e = getEnt();
+    /* 如果已经解锁过且有效期更长，保持更长的 */
+    const keepLonger = e.plus5 && e.expiry && e.expiry > expiry;
+    if (keepLonger) return { ok:true, msg:'该权益已解锁，有效期更长' };
+    e.plus5 = true;
+    /* 续费场景：如果之前没过期，新的到期日从原到期日顺延；否则从今天开始 */
+    if (e.expiry && todayYmd() <= e.expiry){
+      /* 旧到期日 + 新时长 */
+      const e2 = { ...getEnt() };
+      e2.plus5 = true; e2.expiry = expiry;
+      /* 但这里 expiry 是发码时算好的，发码工具从今天算，
+         所以续费要"原到期日 + 时长"才行。简单起见：不管，直接用发码时算出的新到期日。
+         用户如果续得早，就提前续费了（合理）。 */
+    }
+    e.expiry = expiry;
+    e.chat = true;
+    setEnt(e);
+    return { ok:true, type:'S', expiry, msg:`解锁成功，有效期至 ${expiry} （${daysBetween(todayYmd(), expiry)} 天）` };
   }
-  if (e.chat) return { ok:true, msg:'该权益已解锁，无需重复使用' };
-  e.chat = true; setEnt(e);
-  return { ok:true, type:'C', msg:'解锁成功：继续追问' };
+
+  /* 旧永久格式：QG-A/C-serial-sig  共 4 段 */
+  if (parts.length === 4){
+    const sig = parts[3];
+    if ((type !== 'A' && type !== 'C')) return { ok:false, msg:'激活码格式不对，请检查后重试' };
+    if (codeSig(type, serial, '') !== sig) return { ok:false, msg:'激活码无效，请核对后重试' };
+    const e = getEnt();
+    if (type === 'A'){
+      if (e.plus5) return { ok:true, msg:'该权益已解锁，无需重复使用' };
+      e.plus5 = true; e.chat = true;
+      setEnt(e);
+      return { ok:true, type:'A', msg:'解锁成功：已解锁全部功能（旧码，永久）' };
+    }
+    if (e.chat) return { ok:true, msg:'该权益已解锁，无需重复使用' };
+    e.chat = true; setEnt(e);
+    return { ok:true, type:'C', msg:'解锁成功：继续追问' };
+  }
+
+  return { ok:false, msg:'激活码格式不对，请检查后重试' };
 }
 /* ---------- 账号：权益跟账号走，换设备/清缓存可恢复 ---------- */
 const ACCT_KEY = 'qigua_acct_v1';
@@ -1352,7 +1433,7 @@ async function doAcct(action){
     const e = mergeEnt(d.ent);
     closePay();
     if (e.chat && S.result) showChatArea();
-    if (e.plus5 && $('#aiHint')) $('#aiHint').textContent = '会员 · 已解锁全部功能';
+    if (e.plus5 && $('#aiHint')) $('#aiHint').textContent = '会员 · ' + vipStatusText();
     renderHistory();
     toast('已登录 ' + d.phone + '，权益已同步');
   }catch(err){
@@ -1510,12 +1591,17 @@ function loadPendingOrder(){
 function openPay(kind, title){
   payKind = kind === 'C' ? 'C' : 'A';
   const isChat = payKind === 'C';
-  $('#payTitle').textContent = isChat ? '解锁「继续追问」' : (title || '解锁全部功能');
+  $('#payTitle').textContent = isChat ? '解锁「继续追问」' : (title || '开通会员');
   $('#payPrice').textContent = isChat ? '19.9' : '9.9';
   $('#payPriceInline').textContent = isChat ? '19.9' : '9.9';
   $('#payDesc').innerHTML = isChat
-    ? '一次买断，永久解锁继续追问：解卦之后可以围绕这一卦随时追问小易。追问同样计入每日次数。'
-    : '免费用户每天 3 次。解锁后不限次数，并开放凯尔特十字牌阵与历史记录。一次买断，永久有效。';
+    ? '解锁后可围绕这一卦持续向小易提问，会员有效期内均可使用。'
+    : '免费用户每天 3 次。会员期间不限次数，并开放凯尔特十字牌阵与历史记录。按月/季/年订阅，随时续费。';
+  /* 显示当前会员状态（如果已是会员且未过期） */
+  const e = getEnt();
+  if (e.plus5 && e.expiry && todayYmd() <= e.expiry){
+    $('#payDesc').innerHTML += `<br /><span style="color:#c9a66b">当前会员有效期至 ${e.expiry}，续费时新的有效期将从发码时计算。</span>`;
+  }
   $('#payWx').textContent = CONTACT_WX;
   $('#payCode').value = '';
   const acct = getAcct();
@@ -1586,7 +1672,7 @@ async function pollOrder(){
   }catch(e){ /* 网络抖动，下次轮询再试 */ }
 }
 
-function applyUnlock(type){
+function applyUnlock(type, extra){
   const e = getEnt();
   if (type === 'C'){
     if (!e.chat){ e.chat = true; setEnt(e); }
@@ -1599,8 +1685,8 @@ function applyUnlock(type){
   if (!e.plus5){ e.plus5 = true; setEnt(e); }
   syncEnt();
   closePay();
-  $('#aiHint').textContent = '会员 · 已解锁全部功能';
-  toast('解锁成功：已解锁全部功能');
+  $('#aiHint').textContent = '会员 · ' + vipStatusText();
+  toast('解锁成功：' + (extra || '已解锁全部功能'));
   renderHistory();
   if (remainToday() > 0 && S.result) callAI(S.result);
 }
@@ -1608,7 +1694,13 @@ function applyUnlock(type){
 function applyRedeem(){
   const r = redeem($('#payCode').value);
   if (!r.ok){ toast(r.msg); return; }
-  applyUnlock(r.type || 'A');
+  /* redeem 里已经把 plus5/expiry/chat 设好了，这里只刷新 UI */
+  const e = getEnt();
+  if (e.chat && S.result) showChatArea();
+  $('#aiHint').textContent = '会员 · ' + vipStatusText();
+  toast(r.msg);
+  closePay();
+  renderHistory();
 }
 
 function appendChatMsg(role, text){
@@ -2781,7 +2873,7 @@ function init(){
     try{
       const d = await acctApi({ action: 'me', token: acct.token });
       const e = mergeEnt(d.ent);
-      if (e.plus5 && $('#aiHint')) $('#aiHint').textContent = '会员 · 已解锁全部功能';
+      if (e.plus5 && $('#aiHint')) $('#aiHint').textContent = '会员 · ' + vipStatusText();
       renderHistory();
       if (e.chat && S.result) showChatArea();
     }catch(err){ /* 登录过期，忽略 */ }
