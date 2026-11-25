@@ -1739,11 +1739,7 @@ async function callAI(r){
       : cfg.base.replace(/\/+$/, '') + '/chat/completions';
     const headers = { 'Content-Type':'application/json' };
     if (!proxy) headers['Authorization'] = 'Bearer ' + cfg.key;
-    const res = await fetch(url, {
-      method:'POST',
-      signal: aborter.signal,
-      headers,
-      body: JSON.stringify({
+    const reqBody = JSON.stringify({
         model: cfg.model || 'deepseek-chat',
         stream: true,
         temperature: 0.85,
@@ -1751,17 +1747,28 @@ async function callAI(r){
           { role:'system', content:'你是一位精通《易经》又接地气的解卦先生，擅长用大白话把卦象讲透，语气像老朋友。' },
           { role:'user', content: buildPrompt(r) }
         ]
-      })
-    });
-    if (!res.ok){
-      const errText = await res.text().catch(() => '');
-      throw new Error('HTTP ' + res.status + ' ' + errText.slice(0, 160));
+      });
+    /* 上游偶尔返回空内容，自动重试一次再报错 */
+    let res = null, text = '';
+    for (let attempt = 0; attempt < 2 && !text; attempt++){
+      res = await fetch(url, {
+        method:'POST',
+        signal: aborter.signal,
+        headers,
+        body: reqBody
+      });
+      if (!res.ok){
+        const errText = await res.text().catch(() => '');
+        throw new Error('HTTP ' + res.status + ' ' + errText.slice(0, 160));
+      }
+      if ((res.headers.get('content-type') || '').indexOf('event-stream') !== -1) break;
+      const j0 = await res.json().catch(() => null);
+      text = (j0 && j0.choices && j0.choices[0] && j0.choices[0].message && j0.choices[0].message.content) || '';
+      if (!text && attempt === 0) await new Promise(ok => setTimeout(ok, 700));
     }
     const ctype = res.headers.get('content-type') || '';
     if (ctype.indexOf('event-stream') === -1){
-      const j = await res.json().catch(() => null);
-      const text = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
-      if (!text) throw new Error((j && j.error && (j.error.message || j.error)) || '接口无返回内容');
+      if (!text) throw new Error('接口无返回内容（已重试）');
       acc = text;
       let i = 0;
       await new Promise(done => {
