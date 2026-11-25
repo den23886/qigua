@@ -711,7 +711,7 @@
         <div class="pay-desc" id="orderStatusText" style="margin:0">已提交，等待确认…</div>
         <button class="btn ghost sm" id="cancelOrder" style="width:auto;padding:6px 14px;margin-top:10px">取消等待</button>
       </div>
-      <p class="pay-desc" style="margin:8px 0 0;font-size:12px">若长时间没开通，可联系微信 <strong id="payWx" style="color:var(--gold-2)">（待配置）</strong>。</p>
+      <p class="pay-desc" style="margin:8px 0 0;font-size:12px">在爱发电订阅后会收到激活码，粘贴即可自助开通。遇到问题可在爱发电私信我。</p>
       <div class="pay-code">
         <label>已有激活码？</label>
         <input type="text" id="payCode" placeholder="QG-A-XXXXXX-XXXXXXXX" autocapitalize="characters" autocomplete="off" spellcheck="false" />
@@ -1602,7 +1602,6 @@ function openPay(kind, title){
   if (e.plus5 && e.expiry && todayYmd() <= e.expiry){
     $('#payDesc').innerHTML += `<br /><span style="color:#c9a66b">当前会员有效期至 ${e.expiry}，续费时新的有效期将从发码时计算。</span>`;
   }
-  $('#payWx').textContent = CONTACT_WX;
   $('#payCode').value = '';
   const acct = getAcct();
   $('#acctPhone').value = acct ? acct.phone : '';
@@ -1659,7 +1658,7 @@ async function pollOrder(){
       rememberOrder(null);
       curOrder = null;
       setOrderWait(false);
-      toast('订单未通过，如有疑问请联系微信 ' + CONTACT_WX);
+      toast('订单未通过，如有疑问请在爱发电私信我');
       return;
     }
     if (data.status === 'none'){
