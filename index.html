@@ -711,7 +711,9 @@
         <div class="pay-desc" id="orderStatusText" style="margin:0">已提交，等待确认…</div>
         <button class="btn ghost sm" id="cancelOrder" style="width:auto;padding:6px 14px;margin-top:10px">取消等待</button>
       </div>
+      <a class="btn gold" id="payAfdianBtn" style="margin-top:10px;display:none">去爱发电订阅会员</a>
       <p class="pay-desc" style="margin:8px 0 0;font-size:12px">在爱发电订阅后会收到激活码，粘贴即可自助开通。遇到问题可在爱发电私信我。</p>
+      <p class="pay-desc" id="payAfdianTip" style="margin:6px 0 0;font-size:12px"></p>
       <div class="pay-code">
         <label>已有激活码？</label>
         <input type="text" id="payCode" placeholder="QG-S-000001-20270101-XXXXXXXX" autocapitalize="characters" autocomplete="off" spellcheck="false" />
@@ -1171,6 +1173,20 @@ const EXPIRY_WARN_DAYS = 7;
 const MEMBER_URL = '';
 (function(){
   const a = $('#memberBtn');
+  const pb = $('#payAfdianBtn');
+  const tip = $('#payAfdianTip');
+  if(pb){
+    if(MEMBER_URL){
+      pb.href = MEMBER_URL;
+      pb.target = '_blank';
+      pb.rel = 'noopener';
+      pb.textContent = '去爱发电订阅会员';
+      pb.style.display = 'block';
+    }else{
+      pb.style.display = 'none';
+      if(tip) tip.textContent = '订阅入口即将开放。已购买的用户可直接在下方输入激活码开通。';
+    }
+  }
   if(!a) return;
   if(MEMBER_URL){
     a.href = MEMBER_URL;
